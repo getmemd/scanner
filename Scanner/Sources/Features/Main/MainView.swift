@@ -15,7 +15,7 @@ struct MainView: View {
                     Image(.history)
                     Text("History")
                 }
-            Text("Hello")
+            MagnetView()
                 .tabItem {
                     Image(.magnetWave)
                     Text("Magnet")
