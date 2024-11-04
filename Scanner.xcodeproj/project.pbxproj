@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		C5E409642CD83E4500D375D3 /* LanScanner in Frameworks */ = {isa = PBXBuildFile; productRef = C5E409632CD83E4500D375D3 /* LanScanner */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		C5ED59282CD4195C009CDF27 /* Scanner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Scanner.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -36,6 +40,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C5E409642CD83E4500D375D3 /* LanScanner in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -77,8 +82,6 @@
 				C5ED592A2CD4195C009CDF27 /* Scanner */,
 			);
 			name = Scanner;
-			packageProductDependencies = (
-			);
 			productName = Scanner;
 			productReference = C5ED59282CD4195C009CDF27 /* Scanner.app */;
 			productType = "com.apple.product-type.application";
@@ -107,6 +110,9 @@
 			);
 			mainGroup = C5ED591F2CD4195C009CDF27;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				C5E409622CD83E4500D375D3 /* XCRemoteSwiftPackageReference "lan-scanner" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = C5ED59292CD4195C009CDF27 /* Products */;
 			projectDirPath = "";
@@ -269,7 +275,9 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Scanner/Info.plist;
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "The app requires Bluetooth access to scan for nearby devices.";
 				INFOPLIST_KEY_NSCameraUsageDescription = "This app needs permission to access the camera";
+				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "To detect devices on your network, the app requires Local Network access.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -305,7 +313,9 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Scanner/Info.plist;
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "The app requires Bluetooth access to scan for nearby devices.";
 				INFOPLIST_KEY_NSCameraUsageDescription = "This app needs permission to access the camera";
+				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "To detect devices on your network, the app requires Local Network access.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -351,6 +361,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		C5E409622CD83E4500D375D3 /* XCRemoteSwiftPackageReference "lan-scanner" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/MaatheusGois/lan-scanner";
+			requirement = {
+				branch = develop;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		C5E409632CD83E4500D375D3 /* LanScanner */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C5E409622CD83E4500D375D3 /* XCRemoteSwiftPackageReference "lan-scanner" */;
+			productName = LanScanner;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = C5ED59202CD4195C009CDF27 /* Project object */;
 }

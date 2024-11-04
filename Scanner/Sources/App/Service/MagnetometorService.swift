@@ -20,7 +20,7 @@ final class MagnetometorService: ObservableObject {
             return
         }
         motionManager.showsDeviceMovementDisplay = true
-        motionManager.magnetometerUpdateInterval = 0.1
+        motionManager.magnetometerUpdateInterval = 0.5
         motionManager.startMagnetometerUpdates(to: .main) { [weak self] data, error in
             guard let self = self else { return }
             if let error = error {

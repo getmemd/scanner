@@ -32,7 +32,7 @@ struct MagnetView: View {
                     .padding(.top, 24)
                     .padding(.horizontal, 16)
                 HStack {
-                    Text("\(String(format: "%.2f", magnetometorService.magneticStrength))%")
+                    Text("\(String(format: "%.1f", magnetometorService.magneticStrength))%")
                         .font(AppFont.custom(size: 64, weight: .semibold).font)
                         .foregroundStyle(.primaryApp)
                     Text("µT")
@@ -49,7 +49,7 @@ struct MagnetView: View {
                         .font(AppFont.smallText.font)
                         .foregroundStyle(.gray70)
                     Spacer()
-                    Text("300")
+                    Text("1500")
                         .font(AppFont.smallText.font)
                         .foregroundStyle(.gray70)
                 }
