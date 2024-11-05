@@ -10,6 +10,7 @@ import CoreBluetooth
 
 struct BluetoothDevice {
     var peripheral: CBPeripheral
+    var rssi: NSNumber
     var advertisedData: String
 }
 
@@ -60,7 +61,13 @@ class BluetoothService: NSObject, CBCentralManagerDelegate, ObservableObject {
         let dateString = dateFormatter.string(from: Date(timeIntervalSince1970: timestampValue))
         advertisedData = "actual rssi: \(RSSI) dB\n" + "Timestamp: \(dateString)\n" + advertisedData
         if !discoveredDevicesSet.contains(peripheral) {
-            discoveredDevices.append(BluetoothDevice(peripheral: peripheral, advertisedData: advertisedData))
+            discoveredDevices.append(
+                BluetoothDevice(
+                    peripheral: peripheral,
+                    rssi: RSSI,
+                    advertisedData: advertisedData
+                )
+            )
             discoveredDevicesSet.insert(peripheral)
             objectWillChange.send()
         } else {
