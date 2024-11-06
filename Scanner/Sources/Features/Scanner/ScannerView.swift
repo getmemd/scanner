@@ -30,97 +30,115 @@ struct ScannerView: View {
     @ObservedObject private var viewModel = ScannerViewModel()
     @ObservedObject private var bluetoothService = BluetoothService()
     @State private var viewState: ViewState = .wifi
+    @State private var isNavigatingToResults = false
     
     var body: some View {
-        VStack {
-            HStack {
-                Text(viewState.title)
-                    .font(AppFont.h4.font)
-                    .foregroundStyle(.primaryApp)
-                Spacer()
-            }
-            HStack(spacing: 4) {
-                Button(action: {
-                    viewState = .wifi
-                    if bluetoothService.isScanning {
-                        bluetoothService.stopScan()
-                    }
-                }) {
-                    HStack {
-                        Image(.homeWifi)
-                        Text("WI-FI")
-                            .font(AppFont.button.font)
-                    }
-                    .padding()
-                    .frame(maxWidth: .infinity)
-                    .background(viewState == .wifi ? .second : .third)
-                    .foregroundStyle(viewState == .wifi ? .gray0 : .gray70)
-                }
-                Button(action: {
-                    viewState = .bluetooth
-                    if viewModel.isScanning {
-                        viewModel.stopScan()
-                    }
-                }) {
-                    HStack {
-                        Image(.bluetooth)
-                        Text("BLUETOOTH")
-                            .font(AppFont.button.font)
-                    }
-                    .padding()
-                    .frame(maxWidth: .infinity)
-                    .background(viewState == .bluetooth ? .second : .third)
-                    .foregroundStyle(viewState == .bluetooth ? .gray0 : .gray70)
-                }
-            }
-            .clipShape(RoundedRectangle(cornerRadius: 16))
-            .padding(.vertical, 40)
-            Spacer()
-            RadarLoader()
-            if (viewState == .wifi && viewModel.isScanning) || (
-                viewState == .bluetooth && bluetoothService.isScanning
-            ) {
-                Spacer()
+        NavigationStack {
+            VStack {
                 HStack {
-                    Text("Unknown devices detected: \(viewState == .wifi ? viewModel.connectedDevices.count : bluetoothService.discoveredDevices.count)")
-                            .font(AppFont.text.font)
-                            .foregroundColor(.gray90)
+                    Text(viewState.title)
+                        .font(AppFont.h4.font)
+                        .foregroundStyle(.primaryApp)
                     Spacer()
                 }
-                if viewState == .wifi {
-                    HStack {
-                        Text("Your IP: \(viewModel.getIpAddress() ?? "unknown")")
-                            .font(AppFont.smallText.font)
-                            .foregroundColor(.gray70)
-                        Spacer()
-                    }
-                }
-                Spacer()
-            } else {
-                Spacer()
-                Button(action: {
-                    switch viewState {
-                    case .wifi:
-                        viewModel.reload()
-                    case .bluetooth:
-                        bluetoothService.startScan()
-                    }
-                }) {
-                    Text(viewState.buttonTitle)
-                        .font(AppFont.button.font)
-                        .foregroundColor(.gray10)
+                HStack(spacing: 4) {
+                    Button(action: {
+                        viewState = .wifi
+                        if bluetoothService.isScanning {
+                            bluetoothService.stopScan()
+                        }
+                    }) {
+                        HStack {
+                            Image(.homeWifi)
+                            Text("WI-FI")
+                                .font(AppFont.button.font)
+                        }
                         .padding()
                         .frame(maxWidth: .infinity)
-                        .background(.primaryApp)
-                        .cornerRadius(12)
+                        .background(viewState == .wifi ? .second : .third)
+                        .foregroundStyle(viewState == .wifi ? .gray0 : .gray70)
+                    }
+                    Button(action: {
+                        viewState = .bluetooth
+                        if viewModel.isScanning {
+                            viewModel.stopScan()
+                        }
+                    }) {
+                        HStack {
+                            Image(.bluetooth)
+                            Text("BLUETOOTH")
+                                .font(AppFont.button.font)
+                        }
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(viewState == .bluetooth ? .second : .third)
+                        .foregroundStyle(viewState == .bluetooth ? .gray0 : .gray70)
+                    }
+                }
+                .clipShape(RoundedRectangle(cornerRadius: 16))
+                .padding(.vertical, 40)
+                Spacer()
+                RadarLoader()
+                if (viewState == .wifi && viewModel.isScanning) || (
+                    viewState == .bluetooth && bluetoothService.isScanning
+                ) {
+                    Spacer()
+                    HStack {
+                        Text("Unknown devices detected: \(viewState == .wifi ? viewModel.connectedDevices.count : bluetoothService.discoveredDevices.count)")
+                            .font(AppFont.text.font)
+                            .foregroundColor(.gray90)
+                        Spacer()
+                    }
+                    if viewState == .wifi {
+                        HStack {
+                            Text("Your IP: \(viewModel.getIpAddress() ?? "unknown")")
+                                .font(AppFont.smallText.font)
+                                .foregroundColor(.gray70)
+                            Spacer()
+                        }
+                    }
+                    Spacer()
+                } else {
+                    Spacer()
+                    Button(action: {
+                        switch viewState {
+                        case .wifi:
+                            viewModel.reload()
+                        case .bluetooth:
+                            bluetoothService.startScan()
+                        }
+                        navigateToResult()
+                    }) {
+                        Text(viewState.buttonTitle)
+                            .font(AppFont.button.font)
+                            .foregroundColor(.gray10)
+                            .padding()
+                            .frame(maxWidth: .infinity)
+                            .background(.primaryApp)
+                            .cornerRadius(12)
+                    }
+                }
+            }
+            .padding([.bottom, .horizontal], 32)
+            .background(Color.forth.ignoresSafeArea())
+            .onDisappear {
+                bluetoothService.stopScan()
+                viewModel.stopScan()
+            }
+            .navigationDestination(isPresented: $isNavigatingToResults) {
+                switch viewState {
+                case .wifi:
+                    ResultView<LanDeviceModel>(devices: viewModel.connectedDevices)
+                case .bluetooth:
+                    ResultView<BluetoothDeviceModel>(devices: bluetoothService.discoveredDevices)
                 }
             }
         }
-        .padding([.bottom, .horizontal], 32)
-        .background(Color.forth.ignoresSafeArea())
-        .onDisappear {
-            bluetoothService.stopScan()
-            viewModel.stopScan()
+    }
+    
+    private func navigateToResult() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 10) {
+            isNavigatingToResults = true
         }
     }
 }

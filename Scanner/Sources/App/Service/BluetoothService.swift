@@ -8,14 +8,8 @@
 import SwiftUI
 import CoreBluetooth
 
-struct BluetoothDevice {
-    var peripheral: CBPeripheral
-    var rssi: NSNumber
-    var advertisedData: String
-}
-
 class BluetoothService: NSObject, CBCentralManagerDelegate, ObservableObject {
-    @Published var discoveredDevices = [BluetoothDevice]()
+    @Published var discoveredDevices = [Device<BluetoothDeviceModel>]()
     @Published var isScanning = false
     
     var centralManager: CBCentralManager!
@@ -54,25 +48,15 @@ class BluetoothService: NSObject, CBCentralManagerDelegate, ObservableObject {
                         didDiscover peripheral: CBPeripheral,
                         advertisementData: [String : Any],
                         rssi RSSI: NSNumber) {
-        var advertisedData = advertisementData.map { "\($0): \($1)" }.sorted(by: { $0 < $1 }).joined(separator: "\n")
-        let timestampValue = advertisementData["kCBAdvDataTimestamp"] as! Double
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "HH:mm:ss"
-        let dateString = dateFormatter.string(from: Date(timeIntervalSince1970: timestampValue))
-        advertisedData = "actual rssi: \(RSSI) dB\n" + "Timestamp: \(dateString)\n" + advertisedData
         if !discoveredDevicesSet.contains(peripheral) {
             discoveredDevices.append(
-                BluetoothDevice(
-                    peripheral: peripheral,
-                    rssi: RSSI,
-                    advertisedData: advertisedData
-                )
+                Device(device: BluetoothDeviceModel(id: peripheral.identifier, name: peripheral.name, rssi: RSSI.intValue), isSecure: true)
             )
             discoveredDevicesSet.insert(peripheral)
             objectWillChange.send()
         } else {
-            if let index = discoveredDevices.firstIndex(where: { $0.peripheral == peripheral }) {
-                discoveredDevices[index].advertisedData = advertisedData
+            if let index = discoveredDevices.firstIndex(where: { $0.id == peripheral.identifier }) {
+                discoveredDevices[index].device.rssi = RSSI.intValue
                 objectWillChange.send()
             }
         }

@@ -9,7 +9,7 @@ import Foundation
 import LanScanner
 
 final class ScannerViewModel: ObservableObject {
-    @Published var connectedDevices = [LanDevice]()
+    @Published var connectedDevices = [Device<LanDeviceModel>]()
     @Published var isScanning: Bool = false
     private lazy var scanner = LanScanner(delegate: self)
     
@@ -60,7 +60,7 @@ extension ScannerViewModel: LanScannerDelegate {
     func lanScanHasUpdatedProgress(_ progress: CGFloat, address: String) { }
     
     func lanScanDidFindNewDevice(_ device: LanDevice) {
-        connectedDevices.append(device)
+        connectedDevices.append(Device(device: LanDeviceModel(from: device), isSecure: true))
     }
     
     func lanScanDidFinishScanning() {
