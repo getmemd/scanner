@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import LanScanner
 
 struct LanDeviceView: View {
     @State var selectedDevice: Device<LanDeviceModel>

@@ -9,25 +9,24 @@ import SwiftUI
 
 struct DeviceListView<T: Codable>: View {
     var devices: [Device<T>]
-    var isSecure = true
+    @State var isSecure: Bool = true
     
     var body: some View {
         VStack {
             ForEach(devices) { device in
                 VStack {
                     if let lanDevice = device as? Device<LanDeviceModel> {
-                        NavigationLink(destination: DetailLanView(lanDevice: lanDevice.device, isSecure: isSecure)) {
-                            LanDeviceView(selectedDevice: lanDevice)
-                        }
+                        NavigationLink(destination: DetailLanView(
+                            isSecure: isSecure,
+                            lanDevice: lanDevice.device)) {
+                                LanDeviceView(selectedDevice: lanDevice)
+                            }
                     } else if let bluetoothDevice = device as? Device<BluetoothDeviceModel> {
-                        NavigationLink(
-                            destination: DetailBluetoothView(
-                                bluetoothDevice: bluetoothDevice.device,
-                                isSecure: isSecure
-                            )
-                        ) {
-                            BluetoothDeviceView(selectedDevice: bluetoothDevice)
-                        }
+                        NavigationLink(destination: DetailBluetoothView(
+                            isSecure: isSecure,
+                            bluetoothDevice: bluetoothDevice.device)) {
+                                BluetoothDeviceView(selectedDevice: bluetoothDevice)
+                            }
                     }
                     Divider()
                 }

@@ -6,13 +6,12 @@
 //
 
 import SwiftUI
-import LanScanner
 
 struct DetailLanView: View {
     @Environment(\.presentationMode) var presentationMode
+    @State var isSecure: Bool
     
     let lanDevice: LanDeviceModel?
-    let isSecure: Bool
     
     var body: some View {
         VStack {
@@ -79,8 +78,9 @@ struct DetailLanView: View {
                     .cornerRadius(12)
             }
             Button(action: {
+                secureDevice()
             }) {
-                Text("LABEL THE DEVICE AS SAFE")
+                Text("LABEL THE DEVICE AS \(isSecure ? "UNSECURE" : "SAFE")")
                     .font(AppFont.button.font)
                     .foregroundColor(isSecure ? .error : .success)
                     .padding()
@@ -108,8 +108,9 @@ struct DetailLanView: View {
                         HStack(spacing: 4) {
                             Image(.homeWifi)
                                 .resizable()
-                                .foregroundColor(.gray70)
+                                .scaledToFit()
                                 .frame(width: 16, height: 16)
+                                .foregroundColor(.gray70)
                             Text("Wi-Fi scanner")
                                 .font(AppFont.smallText.font)
                                 .foregroundColor(.gray70)
@@ -122,5 +123,11 @@ struct DetailLanView: View {
         .navigationBarBackButtonHidden(true)
         .navigationBarTitleDisplayMode(.inline)
         .background(Color.forth.ignoresSafeArea())
+    }
+    
+    private func secureDevice() {
+        guard let ipAddress = lanDevice?.ipAddress else { return }
+        StorageService.shared.updateSpecificByIp(ipAddress: ipAddress)
+        isSecure.toggle()
     }
 }

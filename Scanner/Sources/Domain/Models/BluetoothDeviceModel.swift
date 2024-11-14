@@ -8,7 +8,7 @@
 import Foundation
 
 struct BluetoothDeviceModel: Codable, Equatable {
-    var id: UUID
-    var name: String?
-    var rssi: Int
+    let id: UUID
+    let name: String?
+    var rssi: Int?
 }

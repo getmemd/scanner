@@ -8,57 +8,83 @@
 import SwiftUI
 import CoreBluetooth
 
-class BluetoothService: NSObject, CBCentralManagerDelegate, ObservableObject {
+final class BluetoothService: NSObject, CBCentralManagerDelegate, ObservableObject {
     @Published var discoveredDevices = [Device<BluetoothDeviceModel>]()
     @Published var isScanning = false
     
     var centralManager: CBCentralManager!
-    var discoveredDevicesSet = Set<CBPeripheral>()
-    var timer: Timer?
-
+    private var discoveredDevicesDict = [CBPeripheral: Device<BluetoothDeviceModel>]()
+    
     override init() {
         super.init()
         centralManager = CBCentralManager(delegate: self, queue: nil)
     }
-
+    
+    private var scanTimer: DispatchSourceTimer?
+    
     func startScan() {
-        if centralManager.state == .poweredOn {
-            isScanning = true
-            discoveredDevices.removeAll()
-            discoveredDevicesSet.removeAll()
-            objectWillChange.send()
-            centralManager.scanForPeripherals(withServices: nil)
-            timer?.invalidate()
-            timer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { [weak self] timer in
-                self?.centralManager.stopScan()
-                self?.centralManager.scanForPeripherals(withServices: nil)
-            }
+        guard centralManager.state == .poweredOn else { return }
+        isScanning = true
+        discoveredDevices.removeAll()
+        discoveredDevicesDict.removeAll()
+        centralManager.scanForPeripherals(withServices: nil)
+        scanTimer?.cancel()
+        scanTimer = DispatchSource.makeTimerSource()
+        scanTimer?.schedule(deadline: .now(), repeating: 2.0)
+        scanTimer?.setEventHandler { [weak self] in
+            guard let self = self else { return }
+            self.centralManager.stopScan()
+            self.centralManager.scanForPeripherals(withServices: nil)
         }
+        scanTimer?.resume()
     }
-
+    
     func stopScan() {
         isScanning = false
-        timer?.invalidate()
+        scanTimer?.cancel()
+        scanTimer = nil
         centralManager.stopScan()
     }
-
+    
+    deinit {
+        stopScan()
+    }
+    
+    func checkSecure() {
+        guard let bluetoothHistory = StorageService.shared.getHistoryDataForBluetooth() else { return }
+        DispatchQueue.main.async {
+            for (index, device) in self.discoveredDevices.enumerated() {
+                if let historyDevice = bluetoothHistory.first(where: { $0.device.id == device.device.id }) {
+                    if historyDevice.isSecure != device.isSecure {
+                        self.discoveredDevices[index].isSecure = historyDevice.isSecure
+                    }
+                }
+            }
+            let modifiedDevices = self.discoveredDevices.map { device in
+                var modifiedDevice = device
+                modifiedDevice.device.rssi = nil
+                return modifiedDevice
+            }
+            StorageService.shared.setHistoryForBluetooth(modifiedDevices)
+        }
+    }
+    
     func centralManagerDidUpdateState(_ central: CBCentralManager) { }
-
+    
     func centralManager(_ central: CBCentralManager,
                         didDiscover peripheral: CBPeripheral,
-                        advertisementData: [String : Any],
+                        advertisementData: [String: Any],
                         rssi RSSI: NSNumber) {
-        if !discoveredDevicesSet.contains(peripheral) {
-            discoveredDevices.append(
-                Device(device: BluetoothDeviceModel(id: peripheral.identifier, name: peripheral.name, rssi: RSSI.intValue), isSecure: true)
-            )
-            discoveredDevicesSet.insert(peripheral)
-            objectWillChange.send()
+        if let existingDevice = discoveredDevicesDict[peripheral] {
+            var updatedDevice = existingDevice
+            updatedDevice.device.rssi = RSSI.intValue
+            discoveredDevicesDict[peripheral] = updatedDevice
+            discoveredDevices = Array(discoveredDevicesDict.values)
         } else {
-            if let index = discoveredDevices.firstIndex(where: { $0.id == peripheral.identifier }) {
-                discoveredDevices[index].device.rssi = RSSI.intValue
-                objectWillChange.send()
-            }
+            let device = BluetoothDeviceModel(id: peripheral.identifier, name: peripheral.name, rssi: RSSI.intValue)
+            let newDevice = Device(device: device, date: Date(), isSecure: device.name != nil)
+            discoveredDevicesDict[peripheral] = newDevice
+            discoveredDevices = Array(discoveredDevicesDict.values)
         }
     }
 }

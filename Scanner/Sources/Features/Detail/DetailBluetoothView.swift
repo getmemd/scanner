@@ -10,9 +10,9 @@ import SwiftUI
 struct DetailBluetoothView: View {
     @Environment(\.presentationMode) var presentationMode
     @State private var proximity = 0
+    @State var isSecure: Bool
     
     let bluetoothDevice: BluetoothDeviceModel?
-    let isSecure: Bool
     
     var body: some View {
         VStack(spacing: 16) {
@@ -61,8 +61,9 @@ struct DetailBluetoothView: View {
                     .cornerRadius(12)
             }
             Button(action: {
+                secureDevice()
             }) {
-                Text("LABEL THE DEVICE AS SAFE")
+                Text("LABEL THE DEVICE AS \(isSecure ? "UNSECURE" : "SAFE")")
                     .font(AppFont.button.font)
                     .foregroundColor(isSecure ? .error : .success)
                     .padding()
@@ -94,8 +95,9 @@ struct DetailBluetoothView: View {
                         HStack(spacing: 4) {
                             Image(.bluetooth)
                                 .resizable()
-                                .foregroundColor(.gray70)
+                                .scaledToFit()
                                 .frame(width: 16, height: 16)
+                                .foregroundColor(.gray70)
                             Text("Bluetooth scanner")
                                 .font(AppFont.smallText.font)
                                 .foregroundColor(.gray70)
@@ -109,7 +111,7 @@ struct DetailBluetoothView: View {
         }
     }
     
-    func calculateProximityPercentage() {
+    private func calculateProximityPercentage() {
         guard let rssi = bluetoothDevice?.rssi else { return }
         let minRSSI = -100
         let maxRSSI = -40
@@ -117,8 +119,10 @@ struct DetailBluetoothView: View {
         let proximityPercentage = (Double(clampedRSSI - minRSSI) / Double(maxRSSI - minRSSI)) * 100
         proximity = Int(proximityPercentage)
     }
-}
-
-#Preview {
-    DetailBluetoothView(bluetoothDevice: nil, isSecure: true)
+    
+    private func secureDevice() {
+        guard let id = bluetoothDevice?.id else { return }
+        StorageService.shared.updateSpecificById(id: id)
+        isSecure.toggle()
+    }
 }

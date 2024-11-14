@@ -6,22 +6,23 @@
 //
 
 import Foundation
-import LanScanner
 
-final class ScannerViewModel: ObservableObject {
+final class ScannerViewModel: NSObject, ObservableObject {
     @Published var connectedDevices = [Device<LanDeviceModel>]()
+    @Published var scanProgress: Float = 0.0
     @Published var isScanning: Bool = false
-    private lazy var scanner = LanScanner(delegate: self)
+    @Published var isNavigatingToResults = false
+    private lazy var scanner = LanScan(delegate: self)
     
     func reload() {
         isScanning = true
         connectedDevices.removeAll()
-        scanner.start()
+        scanner?.start()
     }
     
     func stopScan() {
         isScanning = false
-        scanner.stop()
+        scanner?.stop()
     }
     
     func getIpAddress() -> String? {
@@ -52,18 +53,38 @@ final class ScannerViewModel: ObservableObject {
         freeifaddrs(ifaddr)
         return address
     }
+    
+    func checkSecure() {
+        guard let lanHistory = StorageService.shared.getHistoryDataForWifi() else { return }
+        for (index, device) in connectedDevices.enumerated() {
+            if let historyDevice = lanHistory.first(where: { $0.device.ipAddress == device.device.ipAddress }) {
+                if historyDevice.isSecure != device.isSecure {
+                    DispatchQueue.main.async { [weak self] in
+                        self?.connectedDevices[index].isSecure = historyDevice.isSecure
+                    }
+                }
+            }
+        }
+        isScanning = false
+        isNavigatingToResults = true
+        StorageService.shared.setHistoryForWifi(connectedDevices)
+    }
 }
 
-// MARK: - LanScannerDelegate
+// MARK: - LANScanDelegate
 
-extension ScannerViewModel: LanScannerDelegate {
-    func lanScanHasUpdatedProgress(_ progress: CGFloat, address: String) { }
+extension ScannerViewModel: LANScanDelegate {
+    func lanScanHasUpdatedProgress(_ counter: Int, address: String!) {
+        scanProgress = Float(counter) / Float(MAX_IP_RANGE)
+    }
     
-    func lanScanDidFindNewDevice(_ device: LanDevice) {
-        connectedDevices.append(Device(device: LanDeviceModel(from: device), isSecure: true))
+    func lanScanDidFindNewDevice(_ device: [AnyHashable : Any]!) {
+        guard let device = device as? [AnyHashable : String] else { return }
+        let lanDevice = LanDeviceModel(device: device)
+        connectedDevices.append(Device<LanDeviceModel>(device: lanDevice, date: Date(), isSecure: lanDevice.mac != nil))
     }
     
     func lanScanDidFinishScanning() {
-        isScanning = false
+        checkSecure()
     }
 }

@@ -71,7 +71,6 @@ struct MagnetView: View {
                     .background(.primaryApp)
                     .cornerRadius(12)
             }
-            .padding(.horizontal, 16)
         }
         .padding([.bottom, .horizontal], 32)
         .background(Color.forth.ignoresSafeArea())

@@ -32,7 +32,7 @@ struct BluetoothDeviceView: View {
     }
     
     private func calculateDistance() -> String {
-        let measuredPower: Int = -59
-        return String(format: "%.2f m", pow(10.0, Double(measuredPower - selectedDevice.device.rssi) / 20.0))
+        guard let rssi = selectedDevice.device.rssi else { return "" }
+        return String(format: "%.2f m", pow(10.0, Double(-59 - rssi) / (10 * 2)))
     }
 }

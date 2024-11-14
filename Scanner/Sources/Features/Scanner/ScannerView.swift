@@ -30,7 +30,6 @@ struct ScannerView: View {
     @ObservedObject private var viewModel = ScannerViewModel()
     @ObservedObject private var bluetoothService = BluetoothService()
     @State private var viewState: ViewState = .wifi
-    @State private var isNavigatingToResults = false
     
     var body: some View {
         NavigationStack {
@@ -90,11 +89,14 @@ struct ScannerView: View {
                         Spacer()
                     }
                     if viewState == .wifi {
-                        HStack {
+                        VStack(alignment: .leading) {
                             Text("Your IP: \(viewModel.getIpAddress() ?? "unknown")")
                                 .font(AppFont.smallText.font)
                                 .foregroundColor(.gray70)
-                            Spacer()
+                            ProgressView("Searching", value: viewModel.scanProgress, total: 1.0)
+                                .font(AppFont.smallText.font)
+                                .foregroundColor(.primaryApp)
+                                .padding(.top)
                         }
                     }
                     Spacer()
@@ -106,8 +108,8 @@ struct ScannerView: View {
                             viewModel.reload()
                         case .bluetooth:
                             bluetoothService.startScan()
+                            navigateToResult()
                         }
-                        navigateToResult()
                     }) {
                         Text(viewState.buttonTitle)
                             .font(AppFont.button.font)
@@ -125,7 +127,7 @@ struct ScannerView: View {
                 bluetoothService.stopScan()
                 viewModel.stopScan()
             }
-            .navigationDestination(isPresented: $isNavigatingToResults) {
+            .navigationDestination(isPresented: $viewModel.isNavigatingToResults) {
                 switch viewState {
                 case .wifi:
                     ResultView<LanDeviceModel>(devices: viewModel.connectedDevices)
@@ -138,7 +140,8 @@ struct ScannerView: View {
     
     private func navigateToResult() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 10) {
-            isNavigatingToResults = true
+            bluetoothService.checkSecure()
+            viewModel.isNavigatingToResults = true
         }
     }
 }

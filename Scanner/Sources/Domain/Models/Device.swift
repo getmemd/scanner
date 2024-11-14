@@ -6,10 +6,10 @@
 //
 
 import Foundation
-import LanScanner
 
 struct Device<T: Codable>: Codable, Identifiable {
     var id = UUID()
     var device: T
-    var isSecure: Bool
+    var date: Date
+    var isSecure: Bool = false
 }
