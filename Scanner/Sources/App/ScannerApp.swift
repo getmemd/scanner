@@ -9,9 +9,20 @@ import SwiftUI
 
 @main
 struct ScannerApp: App {
+    @State private var isOnboardingActive: Bool
+    
+    init() {
+        _isOnboardingActive = State(initialValue: !StorageService.shared.isOnboardingShowed())
+    }
+    
     var body: some Scene {
         WindowGroup {
-            MainView()
+            if isOnboardingActive {
+                OnboardingView(isOnboardingActive: $isOnboardingActive)
+                    .ignoresSafeArea()
+            } else {
+                MainView()
+            }
         }
     }
 }

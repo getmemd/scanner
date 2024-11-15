@@ -1,0 +1,24 @@
+{
+  "originHash" : "28467dc4fd2e5c5bbf62ec5fdd11a353605deafff1e393601863651d4e9885e3",
+  "pins" : [
+    {
+      "identity" : "appsflyerframework",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/AppsFlyerSDK/AppsFlyerFramework",
+      "state" : {
+        "revision" : "048633aeec183ddd41b5342c5e0ff57f102dd509",
+        "version" : "6.15.3"
+      }
+    },
+    {
+      "identity" : "purchases-ios-spm",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/RevenueCat/purchases-ios-spm",
+      "state" : {
+        "revision" : "3dd291434fd63594b8ada87bca960e001b708241",
+        "version" : "5.8.0"
+      }
+    }
+  ],
+  "version" : 3
+}
