@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		C5127EAE2CE6EA0F00BB8C8A /* AppsFlyerLib in Frameworks */ = {isa = PBXBuildFile; productRef = C5127EAD2CE6EA0F00BB8C8A /* AppsFlyerLib */; };
+		C5127EBF2CE98F7D00BB8C8A /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = C5127EBE2CE98F7D00BB8C8A /* RevenueCat */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -40,17 +40,25 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C5127EAE2CE6EA0F00BB8C8A /* AppsFlyerLib in Frameworks */,
+				C5127EBF2CE98F7D00BB8C8A /* RevenueCat in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		C5127EBD2CE98F7D00BB8C8A /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		C5ED591F2CD4195C009CDF27 = {
 			isa = PBXGroup;
 			children = (
 				C5ED592A2CD4195C009CDF27 /* Scanner */,
+				C5127EBD2CE98F7D00BB8C8A /* Frameworks */,
 				C5ED59292CD4195C009CDF27 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -113,7 +121,6 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				C5127EAB2CE6E92500BB8C8A /* XCRemoteSwiftPackageReference "purchases-ios-spm" */,
-				C5127EAC2CE6EA0F00BB8C8A /* XCRemoteSwiftPackageReference "AppsFlyerFramework" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = C5ED59292CD4195C009CDF27 /* Products */;
@@ -378,21 +385,13 @@
 				minimumVersion = 5.8.0;
 			};
 		};
-		C5127EAC2CE6EA0F00BB8C8A /* XCRemoteSwiftPackageReference "AppsFlyerFramework" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/AppsFlyerSDK/AppsFlyerFramework";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 6.15.3;
-			};
-		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		C5127EAD2CE6EA0F00BB8C8A /* AppsFlyerLib */ = {
+		C5127EBE2CE98F7D00BB8C8A /* RevenueCat */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = C5127EAC2CE6EA0F00BB8C8A /* XCRemoteSwiftPackageReference "AppsFlyerFramework" */;
-			productName = AppsFlyerLib;
+			package = C5127EAB2CE6E92500BB8C8A /* XCRemoteSwiftPackageReference "purchases-ios-spm" */;
+			productName = RevenueCat;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
