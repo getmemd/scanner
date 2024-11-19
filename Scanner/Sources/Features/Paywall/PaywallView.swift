@@ -15,8 +15,9 @@ struct PaywallView: View {
     }
     
     @State private var viewState: PaywallViewState = .info
-    @State private var isTrial: Bool = false
+    @State private var isTrialDisabled: Bool = false
     @State private var selectedPlan: SubscriptionType = .monthly
+    @State private var isBouncing: Bool = false
     
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var viewModel: IAPViewModel
@@ -41,9 +42,10 @@ struct PaywallView: View {
                 if viewState == .info {
                     PaywallInfoView()
                 } else if viewState == .subscriptions {
-                    PaywallSubscriptionsView(isOn: $isTrial, selectedPlan: $selectedPlan)
+                    PaywallSubscriptionsView(isOn: $isTrialDisabled, selectedPlan: $selectedPlan)
                 }
                 Button {
+                    generateHapticFeedback()
                     if viewState == .info {
                         withAnimation {
                             viewState = .subscriptions
@@ -59,6 +61,12 @@ struct PaywallView: View {
                         .frame(maxWidth: .infinity)
                         .background(.primaryApp)
                         .cornerRadius(12)
+                }
+                .scaleEffect(isBouncing ? 1.1 : 1.0)
+                .offset(y: isBouncing ? -10 : 0)
+                .animation(.easeInOut(duration: 1).repeatForever(autoreverses: true), value: isBouncing)
+                .onAppear {
+                    isBouncing = true
                 }
                 HStack {
                     Button {
@@ -94,13 +102,18 @@ struct PaywallView: View {
         var productType: ProductType
         switch selectedPlan {
         case .yearly:
-            productType = isTrial ? .featureYearlyTrial : .featureYearly
+            productType = isTrialDisabled ? .featureYearly : .featureYearlyTrial
         case .monthly:
-            productType = isTrial ? .featureMonthlyTrial : .featureMonthly
+            productType = isTrialDisabled ? .featureMonthly : .featureMonthlyTrial
         case .weekly:
-            productType = isTrial ? .featureWeeklyTrial : .featureWeekly
+            productType = isTrialDisabled ? .featureWeekly : .featureWeeklyTrial
         }
         viewModel.purchaseProduct(productType: productType)
+    }
+    
+    private func generateHapticFeedback() {
+        let generator = UIImpactFeedbackGenerator(style: .medium)
+        generator.impactOccurred()
     }
 }
 

@@ -18,9 +18,6 @@ struct CameraView: View {
                     .font(AppFont.h4.font)
                     .foregroundStyle(Color.primaryApp)
                 Spacer()
-//                NavigationLink(destination: SettingsView()) {
-//                    Image(.settings)
-//                }
             }
             .padding()
             Spacer()
@@ -41,6 +38,7 @@ struct CameraView: View {
             Spacer()
             if model.viewfinderImage == nil {
                 Button(action: {
+                    generateHapticFeedback()
                     Task {
                         await model.camera.start()
                     }
@@ -58,6 +56,7 @@ struct CameraView: View {
             HStack(spacing: 32) {
                 ForEach(FilterType.allCases, id: \.self) { filter in
                     Button(action: {
+                        generateHapticFeedback()
                         model.camera.setFilter(filter)
                         selectedFilter = filter
                     }) {
@@ -85,6 +84,11 @@ struct CameraView: View {
             model.camera.stop()
             model.viewfinderImage = nil
         }
+    }
+    
+    private func generateHapticFeedback() {
+        let generator = UIImpactFeedbackGenerator(style: .medium)
+        generator.impactOccurred()
     }
 }
 

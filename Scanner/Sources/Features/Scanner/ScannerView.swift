@@ -34,14 +34,9 @@ struct ScannerView: View {
     var body: some View {
         NavigationStack {
             VStack {
-                HStack {
-                    Text(viewState.title)
-                        .font(AppFont.h4.font)
-                        .foregroundStyle(.primaryApp)
-                    Spacer()
-                }
                 HStack(spacing: 4) {
                     Button(action: {
+                        generateHapticFeedback()
                         viewState = .wifi
                         if bluetoothService.isScanning {
                             bluetoothService.stopScan()
@@ -58,6 +53,7 @@ struct ScannerView: View {
                         .foregroundStyle(viewState == .wifi ? .gray0 : .gray70)
                     }
                     Button(action: {
+                        generateHapticFeedback()
                         viewState = .bluetooth
                         if viewModel.isScanning {
                             viewModel.stopScan()
@@ -103,6 +99,7 @@ struct ScannerView: View {
                 } else {
                     Spacer()
                     Button(action: {
+                        generateHapticFeedback()
                         switch viewState {
                         case .wifi:
                             viewModel.reload()
@@ -130,9 +127,30 @@ struct ScannerView: View {
             .navigationDestination(isPresented: $viewModel.isNavigatingToResults) {
                 switch viewState {
                 case .wifi:
-                    ResultView<LanDeviceModel>(devices: viewModel.connectedDevices)
+                    ResultView<LanDeviceModel>()
+                        .environmentObject(
+                            DeviceManager<LanDeviceModel>(devices: viewModel.connectedDevices)
+                        )
                 case .bluetooth:
-                    ResultView<BluetoothDeviceModel>(devices: bluetoothService.discoveredDevices)
+                    ResultView<BluetoothDeviceModel>()
+                        .environmentObject(
+                            DeviceManager<BluetoothDeviceModel>(devices: bluetoothService.discoveredDevices)
+                        )
+                }
+            }
+            .toolbar {
+                ToolbarItem(placement: .navigation) {
+                    Text(viewState.title)
+                        .font(AppFont.h4.font)
+                        .foregroundStyle(.primaryApp)
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(action: {
+                        
+                    }) {
+                        Image(.premium)
+                            .foregroundStyle(.warning)
+                    }
                 }
             }
         }
@@ -143,6 +161,11 @@ struct ScannerView: View {
             bluetoothService.checkSecure()
             viewModel.isNavigatingToResults = true
         }
+    }
+    
+    private func generateHapticFeedback() {
+        let generator = UIImpactFeedbackGenerator(style: .medium)
+        generator.impactOccurred()
     }
 }
 

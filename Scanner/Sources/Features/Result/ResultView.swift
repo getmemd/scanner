@@ -9,30 +9,21 @@ import SwiftUI
 
 struct ResultView<T: Codable>: View {
     @Environment(\.presentationMode) var presentationMode
-    
-    @State var devices: [Device<T>] = []
-    
-    private var secureDevices: [Device<T>] {
-        devices.filter { $0.isSecure }
-    }
-    
-    private var dubiousDevices: [Device<T>] {
-        devices.filter { !$0.isSecure }
-    }
+    @EnvironmentObject var deviceManager: DeviceManager<T>
     
     var body: some View {
         ScrollView {
             HStack {
-                Text("Found devices: \(devices.count)")
+                Text("Found devices: \(deviceManager.devices.count)")
                     .font(AppFont.h5.font)
                     .foregroundColor(.gray90)
                 Spacer()
-                Text("Dubious devices: \(dubiousDevices.count)")
+                Text("Dubious devices: \(deviceManager.devicesFiltered(by: false).count)")
                     .font(AppFont.h5.font)
                     .foregroundColor(.error)
             }
-            DeviceListView(devices: secureDevices, isSecure: true)
-            DeviceListView(devices: dubiousDevices, isSecure: false)
+            DeviceListView<T>()
+                .environmentObject(deviceManager)
             Spacer()
         }
         .padding()

@@ -30,6 +30,12 @@ final class HistoryViewModel: ObservableObject {
         lanDevicesByDate = groupDevicesByDay(devices: lanDevices)
     }
     
+    func clearHistory() {
+        StorageService.shared.removeAll()
+        bleDevicesByDate.removeAll()
+        lanDevicesByDate.removeAll()
+    }
+    
     private func groupDevicesByDay<T>(devices: [Device<T>]) -> [Date: [Device<T>]] {
         let calendar = Calendar.current
         return Dictionary(grouping: devices) { device in

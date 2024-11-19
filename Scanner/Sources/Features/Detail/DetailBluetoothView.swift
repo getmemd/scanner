@@ -9,22 +9,22 @@ import SwiftUI
 
 struct DetailBluetoothView: View {
     @Environment(\.presentationMode) var presentationMode
+    @EnvironmentObject var deviceManager: DeviceManager<BluetoothDeviceModel>
     @State private var proximity = 0
-    @State var isSecure: Bool
     
-    let bluetoothDevice: BluetoothDeviceModel?
+    @State var bleDevice: Device<BluetoothDeviceModel>
     
     var body: some View {
         VStack(spacing: 16) {
             VStack(alignment: .leading, spacing: 16) {
                 HStack(alignment: .top) {
-                    Image(isSecure ? .checkSquare : .dangerSquare)
-                        .foregroundColor(isSecure ? .success : .error)
+                    Image(bleDevice.isSecure ? .checkSquare : .dangerSquare)
+                        .foregroundColor(bleDevice.isSecure ? .success : .error)
                     VStack(alignment: .leading, spacing: 4) {
-                        Text(bluetoothDevice?.name ?? "Unknown")
+                        Text(bleDevice.device.name ?? "Unknown")
                             .font(AppFont.text.font)
                             .foregroundColor(.gray80)
-                        Text(bluetoothDevice?.id.uuidString ?? "Unknown")
+                        Text(bleDevice.device.id.uuidString)
                             .font(AppFont.smallText.font)
                             .foregroundColor(.gray60)
                     }
@@ -47,10 +47,11 @@ struct DetailBluetoothView: View {
             .padding()
             .background(
                 RoundedRectangle(cornerRadius: 16)
-                    .stroke(isSecure ? .success : .error, lineWidth: 1)
+                    .stroke(bleDevice.isSecure ? .success : .error, lineWidth: 1)
             )
             Spacer()
             Button(action: {
+                generateHapticFeedback()
             }) {
                 Text("SEARCH")
                     .font(AppFont.button.font)
@@ -61,16 +62,17 @@ struct DetailBluetoothView: View {
                     .cornerRadius(12)
             }
             Button(action: {
+                generateHapticFeedback()
                 secureDevice()
             }) {
-                Text("LABEL THE DEVICE AS \(isSecure ? "UNSECURE" : "SAFE")")
+                Text("LABEL THE DEVICE AS \(bleDevice.isSecure ? "UNSECURE" : "SAFE")")
                     .font(AppFont.button.font)
-                    .foregroundColor(isSecure ? .error : .success)
+                    .foregroundColor(bleDevice.isSecure ? .error : .success)
                     .padding()
                     .frame(maxWidth: .infinity)
                     .background(
                         RoundedRectangle(cornerRadius: 12)
-                            .stroke(isSecure ? .error : .success, lineWidth: 2)
+                            .stroke(bleDevice.isSecure ? .error : .success, lineWidth: 2)
                     )
             }
         }
@@ -112,7 +114,7 @@ struct DetailBluetoothView: View {
     }
     
     private func calculateProximityPercentage() {
-        guard let rssi = bluetoothDevice?.rssi else { return }
+        guard let rssi = bleDevice.device.rssi else { return }
         let minRSSI = -100
         let maxRSSI = -40
         let clampedRSSI = max(min(rssi, maxRSSI), minRSSI)
@@ -121,8 +123,13 @@ struct DetailBluetoothView: View {
     }
     
     private func secureDevice() {
-        guard let id = bluetoothDevice?.id else { return }
-        StorageService.shared.updateSpecificById(id: id)
-        isSecure.toggle()
+        StorageService.shared.updateSpecificById(id: bleDevice.device.id)
+        bleDevice.isSecure.toggle()
+        deviceManager.toggleSecureStatus(for: bleDevice)
+    }
+    
+    private func generateHapticFeedback() {
+        let generator = UIImpactFeedbackGenerator(style: .medium)
+        generator.impactOccurred()
     }
 }

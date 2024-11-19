@@ -8,34 +8,48 @@
 import SwiftUI
 
 struct DeviceListView<T: Codable>: View {
-    var devices: [Device<T>]
-    @State var isSecure: Bool = true
-    
+    @EnvironmentObject var deviceManager: DeviceManager<T>
+
     var body: some View {
         VStack {
-            ForEach(devices) { device in
+            deviceSection(isSecure: true)
+            deviceSection(isSecure: false)
+        }
+    }
+
+    @ViewBuilder
+    private func deviceSection(isSecure: Bool) -> some View {
+        VStack {
+            ForEach(deviceManager.devicesFiltered(by: isSecure)) { device in
                 VStack {
-                    if let lanDevice = device as? Device<LanDeviceModel> {
-                        NavigationLink(destination: DetailLanView(
-                            isSecure: isSecure,
-                            lanDevice: lanDevice.device)) {
-                                LanDeviceView(selectedDevice: lanDevice)
-                            }
-                    } else if let bluetoothDevice = device as? Device<BluetoothDeviceModel> {
-                        NavigationLink(destination: DetailBluetoothView(
-                            isSecure: isSecure,
-                            bluetoothDevice: bluetoothDevice.device)) {
-                                BluetoothDeviceView(selectedDevice: bluetoothDevice)
-                            }
-                    }
+                    deviceRow(for: device)
                     Divider()
                 }
                 .padding()
             }
         }
-        .background(
+        .overlay(
             RoundedRectangle(cornerRadius: 16)
                 .stroke(isSecure ? .success : .error, lineWidth: 1)
         )
+    }
+
+    @ViewBuilder
+    private func deviceRow(for device: Device<T>) -> some View {
+        if let lanDevice = device as? Device<LanDeviceModel> {
+            NavigationLink(
+                destination: DetailLanView(lanDevice: lanDevice)
+                    .environmentObject(deviceManager)
+            ) {
+                LanDeviceView(selectedDevice: lanDevice)
+            }
+        } else if let bluetoothDevice = device as? Device<BluetoothDeviceModel> {
+            NavigationLink(
+                destination: DetailBluetoothView(bleDevice: bluetoothDevice)
+                    .environmentObject(deviceManager)
+            ) {
+                BluetoothDeviceView(selectedDevice: bluetoothDevice)
+            }
+        }
     }
 }

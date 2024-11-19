@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct MainView: View {
+    @EnvironmentObject var iapViewModel: IAPViewModel
     @State private var selection: Int = 2
     
     var body: some View {

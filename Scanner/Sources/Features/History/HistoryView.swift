@@ -10,13 +10,11 @@ import SwiftUI
 struct HistoryView: View {
     @ObservedObject private var viewModel = HistoryViewModel()
     
+    @State private var showAlert = false
+    
     var body: some View {
         NavigationStack {
             VStack {
-                Text("History")
-                    .font(AppFont.h4.font)
-                    .foregroundStyle(.primaryApp)
-                    .padding(.bottom)
                 if viewModel.bleDevicesByDate.isEmpty && viewModel.lanDevicesByDate.isEmpty {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("You have no search history yet")
@@ -29,6 +27,7 @@ struct HistoryView: View {
                     Spacer()
                     VStack {
                         Button(action: {
+                            generateHapticFeedback()
                             // Действие для перехода к сканированию Wi-Fi
                         }) {
                             Text("SEARCH DEVICES ON SHARED WI-FI")
@@ -40,6 +39,7 @@ struct HistoryView: View {
                                 .cornerRadius(12)
                         }
                         Button(action: {
+                            generateHapticFeedback()
                             // Действие для перехода к сканированию Bluetooth
                         }) {
                             Text("SEARCH FOR BLUETOOTH DEVICES")
@@ -70,8 +70,8 @@ struct HistoryView: View {
                                         Text(date.formatted(date: .long, time: .omitted))
                                             .font(AppFont.h5.font)
                                             .foregroundStyle(.gray90)
-                                        DeviceListView(devices: devices.filter { $0.isSecure })
-                                        DeviceListView(devices: devices.filter { !$0.isSecure }, isSecure: false)
+                                        DeviceListView<LanDeviceModel>()
+                                            .environmentObject(DeviceManager<LanDeviceModel>(devices: devices))
                                     }
                                 }
                             }
@@ -90,8 +90,8 @@ struct HistoryView: View {
                                         Text(date.formatted(date: .long, time: .omitted))
                                             .font(AppFont.h5.font)
                                             .foregroundStyle(.gray90)
-                                        DeviceListView(devices: devices.filter { $0.isSecure })
-                                        DeviceListView(devices: devices.filter { !$0.isSecure }, isSecure: false)
+                                        DeviceListView<BluetoothDeviceModel>()
+                                            .environmentObject(DeviceManager<BluetoothDeviceModel>(devices: devices))
                                     }
                                 }
                             }
@@ -101,6 +101,33 @@ struct HistoryView: View {
                     .refreshable {
                         viewModel.loadHistory()
                     }
+                    .toolbar {
+                        ToolbarItem(placement: .topBarTrailing) {
+                            Button(action: {
+                                generateHapticFeedback()
+                                showAlert = true
+                            }) {
+                                Image(.trashBin)
+                                    .foregroundStyle(.gray80)
+                            }
+                        }
+                    }
+                    .alert("Do you want to delete the history?", isPresented: $showAlert) {
+                        Button("Delete History", role: .destructive) {
+                            viewModel.clearHistory()
+                        }
+                        Button("Cancel", role: .cancel) { }
+                    } message: {
+                        Text("It can't be recovered once deleted.")
+                    }
+                }
+            }
+            .toolbar {
+                ToolbarItem(placement: .navigation) {
+                    Text("History")
+                        .font(AppFont.h4.font)
+                        .foregroundStyle(.primaryApp)
+                        .padding(.bottom)
                 }
             }
         }
@@ -108,6 +135,11 @@ struct HistoryView: View {
         .onAppear {
             viewModel.loadHistory()
         }
+    }
+    
+    private func generateHapticFeedback() {
+        let generator = UIImpactFeedbackGenerator(style: .medium)
+        generator.impactOccurred()
     }
 }
 

@@ -65,7 +65,11 @@ final class BluetoothService: NSObject, CBCentralManagerDelegate, ObservableObje
                 modifiedDevice.device.rssi = nil
                 return modifiedDevice
             }
-            StorageService.shared.setHistoryForBluetooth(modifiedDevices)
+            var updatedHistory = bluetoothHistory + modifiedDevices
+            updatedHistory = updatedHistory.removingDuplicates {
+                $0.device.id == $1.device.id && Calendar.current.isDate($0.date, inSameDayAs: $1.date)
+            }
+            StorageService.shared.setHistoryForBluetooth(updatedHistory)
         }
     }
     

@@ -67,7 +67,11 @@ final class ScannerViewModel: NSObject, ObservableObject {
         }
         isScanning = false
         isNavigatingToResults = true
-        StorageService.shared.setHistoryForWifi(connectedDevices)
+        var updatedHistory = lanHistory + connectedDevices
+        updatedHistory = updatedHistory.removingDuplicates {
+            $0.device.ipAddress == $1.device.ipAddress && Calendar.current.isDate($0.date, inSameDayAs: $1.date)
+        }
+        StorageService.shared.setHistoryForWifi(updatedHistory)
     }
 }
 

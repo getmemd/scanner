@@ -9,21 +9,21 @@ import SwiftUI
 
 struct DetailLanView: View {
     @Environment(\.presentationMode) var presentationMode
-    @State var isSecure: Bool
+    @EnvironmentObject var deviceManager: DeviceManager<LanDeviceModel>
     
-    let lanDevice: LanDeviceModel?
+    @State var lanDevice: Device<LanDeviceModel>
     
     var body: some View {
         VStack {
             VStack(alignment: .leading, spacing: 16) {
                 HStack(alignment: .top) {
-                    Image(isSecure ? .checkSquare : .dangerSquare)
-                        .foregroundColor(isSecure ? .success : .error)
+                    Image(lanDevice.isSecure ? .checkSquare : .dangerSquare)
+                        .foregroundColor(lanDevice.isSecure ? .success : .error)
                     VStack(alignment: .leading, spacing: 4) {
-                        Text(lanDevice?.name ?? "Unknown")
+                        Text(lanDevice.device.name)
                             .font(AppFont.text.font)
                             .foregroundColor(.gray80)
-                        Text(lanDevice?.ipAddress ?? "Unknown")
+                        Text(lanDevice.device.ipAddress)
                             .font(AppFont.smallText.font)
                             .foregroundColor(.gray60)
                     }
@@ -36,7 +36,7 @@ struct DetailLanView: View {
                         .font(AppFont.text.font)
                         .foregroundColor(.gray80)
                     Spacer()
-                    Text(lanDevice?.ipAddress ?? "Unknown")
+                    Text(lanDevice.device.ipAddress)
                         .font(AppFont.smallText.font)
                         .foregroundColor(.gray60)
                 }
@@ -46,7 +46,7 @@ struct DetailLanView: View {
                         .font(AppFont.text.font)
                         .foregroundColor(.gray80)
                     Spacer()
-                    Text(lanDevice?.mac ?? "Unknown")
+                    Text(lanDevice.device.mac ?? "Unknown")
                         .font(AppFont.smallText.font)
                         .foregroundColor(.gray60)
                 }
@@ -56,7 +56,7 @@ struct DetailLanView: View {
                         .font(AppFont.text.font)
                         .foregroundColor(.gray80)
                     Spacer()
-                    Text(lanDevice?.brand ?? "Unknown")
+                    Text(lanDevice.device.brand)
                         .font(AppFont.smallText.font)
                         .foregroundColor(.gray60)
                 }
@@ -64,10 +64,11 @@ struct DetailLanView: View {
             .padding()
             .background(
                 RoundedRectangle(cornerRadius: 16)
-                    .stroke(isSecure ? .success : .error, lineWidth: 1)
+                    .stroke(lanDevice.isSecure ? .success : .error, lineWidth: 1)
             )
             Spacer()
             Button(action: {
+                generateHapticFeedback()
             }) {
                 Text("SEARCH")
                     .font(AppFont.button.font)
@@ -78,22 +79,23 @@ struct DetailLanView: View {
                     .cornerRadius(12)
             }
             Button(action: {
+                generateHapticFeedback()
                 secureDevice()
             }) {
-                Text("LABEL THE DEVICE AS \(isSecure ? "UNSECURE" : "SAFE")")
+                Text("LABEL THE DEVICE AS \(lanDevice.isSecure ? "UNSECURE" : "SAFE")")
                     .font(AppFont.button.font)
-                    .foregroundColor(isSecure ? .error : .success)
+                    .foregroundColor(lanDevice.isSecure ? .error : .success)
                     .padding()
                     .frame(maxWidth: .infinity)
                     .background(
                         RoundedRectangle(cornerRadius: 12)
-                            .stroke(isSecure ? .error : .success, lineWidth: 2)
+                            .stroke(lanDevice.isSecure ? .error : .success, lineWidth: 2)
                     )
             }
         }
         .padding()
         .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
+            ToolbarItem(placement: .topBarLeading) {
                 HStack(spacing: 8) {
                     Button(action: {
                         presentationMode.wrappedValue.dismiss()
@@ -126,8 +128,13 @@ struct DetailLanView: View {
     }
     
     private func secureDevice() {
-        guard let ipAddress = lanDevice?.ipAddress else { return }
-        StorageService.shared.updateSpecificByIp(ipAddress: ipAddress)
-        isSecure.toggle()
+        StorageService.shared.updateSpecificByIp(ipAddress: lanDevice.device.ipAddress)
+        lanDevice.isSecure.toggle()
+        deviceManager.toggleSecureStatus(for: lanDevice)
+    }
+    
+    private func generateHapticFeedback() {
+        let generator = UIImpactFeedbackGenerator(style: .medium)
+        generator.impactOccurred()
     }
 }

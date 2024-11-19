@@ -67,6 +67,36 @@ struct SettingsView: View {
                 }
                 .scrollContentBackground(.hidden)
                 .clipShape(.rect(cornerRadius: 16))
+                VStack(spacing: 16) {
+                    Button(action: {
+                        generateHapticFeedback()
+                    }) {
+                        Text("GO PREMIUM NOW")
+                            .font(AppFont.button.font)
+                            .foregroundColor(.gray10)
+                            .padding()
+                            .frame(maxWidth: .infinity)
+                            .background(.primaryApp)
+                            .cornerRadius(12)
+                    }
+                    .padding()
+                    HStack(alignment: .bottom) {
+                        Text("Access all app features and enjoy comprehensive benefits, with additional options and enhanced functionality.")
+                            .font(AppFont.text.font)
+                            .foregroundStyle(.gray80)
+                            .padding()
+                        Image(.premium)
+                            .foregroundStyle(.warning)
+                            .padding()
+                    }
+                }
+                .background(.gray0)
+                .clipShape(.rect(cornerRadius: 16))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(.primaryApp, lineWidth: 1)
+                )
+                .padding()
             }
             .background(Color.forth)
             .navigationDestination(for: OptionType.self) { option in
@@ -119,6 +149,11 @@ struct SettingsView: View {
     
     private func restorePurchases() async throws {
         try await StoreKit.AppStore.sync()
+    }
+    
+    private func generateHapticFeedback() {
+        let generator = UIImpactFeedbackGenerator(style: .medium)
+        generator.impactOccurred()
     }
 }
 

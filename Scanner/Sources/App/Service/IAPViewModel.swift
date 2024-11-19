@@ -21,6 +21,10 @@ final class IAPViewModel: ObservableObject {
     
     @AppStorage("subscriptionEndDate") private(set) var subscriptionEndDate = Date.now.timeIntervalSinceReferenceDate
     
+    var isSubscribed: Bool {
+        Date.now.timeIntervalSinceReferenceDate < subscriptionEndDate
+    }
+    
     init() {
         Task {
             await initialSetup()

@@ -61,6 +61,7 @@ struct MagnetView: View {
             .padding(.top, 40)
             Spacer()
             Button(action: {
+                generateHapticFeedback()
                 isScanning.toggle()
             }) {
                 Text(isScanning ? "STOP SCANNING" : "START SCANNING")
@@ -78,6 +79,11 @@ struct MagnetView: View {
             magnetometorService.stop()
             isScanning = false
         }
+    }
+    
+    private func generateHapticFeedback() {
+        let generator = UIImpactFeedbackGenerator(style: .medium)
+        generator.impactOccurred()
     }
 }
 

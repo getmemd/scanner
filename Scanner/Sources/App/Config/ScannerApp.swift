@@ -55,6 +55,15 @@ struct ScannerApp: App {
                     showPaywall = false
                 }
             }
+            .onAppear {
+                withAnimation {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                        if iapViewModel.subscriptionEndDate < Date.now.timeIntervalSinceReferenceDate {
+                            showPaywall = true
+                        }
+                    }
+                }
+            }
         }
     }
 }

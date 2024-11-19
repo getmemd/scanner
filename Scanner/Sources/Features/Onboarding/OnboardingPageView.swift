@@ -11,6 +11,8 @@ struct OnboardingPageView: View {
     let viewModel: OnboardingPageViewModel
     let onNext: (() -> Void)
     
+    @State private var isBouncing = false
+    
     var body: some View {
         VStack {
             Image(viewModel.image)
@@ -24,6 +26,7 @@ struct OnboardingPageView: View {
                     .fixedSize(horizontal: false, vertical: true)
                     .padding(.bottom, 32)
                 Button(action: {
+                    generateHapticFeedback()
                     onNext()
                 }) {
                     Text("CONTINUE")
@@ -34,10 +37,21 @@ struct OnboardingPageView: View {
                         .background(.primaryApp)
                         .cornerRadius(12)
                 }
+                .scaleEffect(isBouncing ? 1.1 : 1.0)
+                .offset(y: isBouncing ? -10 : 0)
+                .animation(.easeInOut(duration: 1).repeatForever(autoreverses: true), value: isBouncing)
+                .onAppear {
+                    isBouncing = true
+                }
                 .padding(.bottom)
             }
         }
         .padding()
+    }
+    
+    private func generateHapticFeedback() {
+        let generator = UIImpactFeedbackGenerator(style: .medium)
+        generator.impactOccurred()
     }
 }
 
