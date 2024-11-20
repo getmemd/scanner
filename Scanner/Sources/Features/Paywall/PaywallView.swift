@@ -18,8 +18,7 @@ struct PaywallView: View {
     @State private var isTrialDisabled: Bool = false
     @State private var selectedPlan: SubscriptionType = .monthly
     @State private var isBouncing: Bool = false
-    
-    @Environment(\.dismiss) private var dismiss
+    @Binding var showPaywall: Bool
     @EnvironmentObject var viewModel: IAPViewModel
     
     var body: some View {
@@ -31,7 +30,7 @@ struct PaywallView: View {
                         .foregroundStyle(.primaryApp)
                     Spacer()
                     Button {
-                        dismiss()
+                        showPaywall = false
                     } label: {
                         Image(.closeSquare)
                             .resizable()
@@ -62,12 +61,12 @@ struct PaywallView: View {
                         .background(.primaryApp)
                         .cornerRadius(12)
                 }
-                .scaleEffect(isBouncing ? 1.1 : 1.0)
-                .offset(y: isBouncing ? -10 : 0)
-                .animation(.easeInOut(duration: 1).repeatForever(autoreverses: true), value: isBouncing)
-                .onAppear {
-                    isBouncing = true
-                }
+//                .scaleEffect(isBouncing ? 1.1 : 1.0)
+//                .offset(y: isBouncing ? -10 : 0)
+//                .animation(.easeInOut(duration: 1).repeatForever(autoreverses: true), value: isBouncing)
+//                .onAppear {
+//                    isBouncing = true
+//                }
                 HStack {
                     Button {
                         Task {
@@ -99,7 +98,7 @@ struct PaywallView: View {
     }
     
     private func purchaseProduct() {
-        var productType: ProductType
+        let productType: ProductType
         switch selectedPlan {
         case .yearly:
             productType = isTrialDisabled ? .featureYearly : .featureYearlyTrial
@@ -118,5 +117,6 @@ struct PaywallView: View {
 }
 
 #Preview {
-    PaywallView()
+    PaywallView(showPaywall: .constant(true))
+        .environmentObject(IAPViewModel())
 }

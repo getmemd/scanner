@@ -44,6 +44,7 @@ struct MainView: View {
                 }
                 .tag(4)
         }
+        .environmentObject(iapViewModel)
     }
 }
 

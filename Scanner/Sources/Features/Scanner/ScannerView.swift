@@ -27,9 +27,11 @@ struct ScannerView: View {
         }
     }
     
+    @EnvironmentObject var iapViewModel: IAPViewModel
     @ObservedObject private var viewModel = ScannerViewModel()
     @ObservedObject private var bluetoothService = BluetoothService()
     @State private var viewState: ViewState = .wifi
+    @State private var showPaywall = false
     
     var body: some View {
         NavigationStack {
@@ -100,12 +102,16 @@ struct ScannerView: View {
                     Spacer()
                     Button(action: {
                         generateHapticFeedback()
-                        switch viewState {
-                        case .wifi:
-                            viewModel.reload()
-                        case .bluetooth:
-                            bluetoothService.startScan()
-                            navigateToResult()
+                        if iapViewModel.isSubscribed {
+                            switch viewState {
+                            case .wifi:
+                                viewModel.reload()
+                            case .bluetooth:
+                                bluetoothService.startScan()
+                                navigateToResult()
+                            }
+                        } else {
+                            showPaywall = true
                         }
                     }) {
                         Text(viewState.buttonTitle)
@@ -146,13 +152,21 @@ struct ScannerView: View {
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button(action: {
-                        
+                        showPaywall = true
                     }) {
                         Image(.premium)
                             .foregroundStyle(.warning)
                     }
                 }
             }
+            .onChange(of: iapViewModel.subscriptionEndDate) { newValue in
+                if newValue > Date.now.timeIntervalSinceReferenceDate {
+                    showPaywall = false
+                }
+            }
+            .fullScreenCover(isPresented: $showPaywall, content: {
+                PaywallView(showPaywall: $showPaywall)
+            })
         }
     }
     
@@ -171,4 +185,5 @@ struct ScannerView: View {
 
 #Preview {
     ScannerView()
+        .environmentObject(IAPViewModel())
 }

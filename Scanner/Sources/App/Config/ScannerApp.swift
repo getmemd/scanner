@@ -47,7 +47,7 @@ struct ScannerApp: App {
                 }
             }
             .fullScreenCover(isPresented: $showPaywall, content: {
-                PaywallView()
+                PaywallView(showPaywall: $showPaywall)
             })
             .environmentObject(iapViewModel)
             .onChange(of: iapViewModel.subscriptionEndDate) { newValue in
@@ -58,7 +58,7 @@ struct ScannerApp: App {
             .onAppear {
                 withAnimation {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                        if iapViewModel.subscriptionEndDate < Date.now.timeIntervalSinceReferenceDate {
+                        if !iapViewModel.isSubscribed {
                             showPaywall = true
                         }
                     }
