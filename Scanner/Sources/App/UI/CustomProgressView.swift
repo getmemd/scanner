@@ -10,16 +10,16 @@ import SwiftUI
 struct CustomProgressView<Shape: SwiftUI.Shape>: View {
     var value: Double
     var shape: Shape
-
+    
     var body: some View {
         shape.fill(.third)
-             .overlay(alignment: .leading) {
-                 GeometryReader { proxy in
-                     shape.fill(.tint)
-                          .frame(width: proxy.size.width * value)
-                 }
-             }
-             .tint(LinearGradient(colors: [.primaryApp, .second], startPoint: .leading, endPoint: .trailing))
+            .overlay(alignment: .leading) {
+                GeometryReader { proxy in
+                    shape.fill(.tint)
+                        .frame(width: proxy.size.width * min(max(value, 0), 1))
+                }
+            }
+            .tint(LinearGradient(colors: [.primaryApp, .second], startPoint: .leading, endPoint: .trailing))
     }
 }
 

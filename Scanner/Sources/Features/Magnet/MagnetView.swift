@@ -11,7 +11,6 @@ struct MagnetView: View {
     @EnvironmentObject var iapViewModel: IAPViewModel
     
     @State private var showPaywall = false
-    @State private var progress: Double = 0.5
     @State private var isScanning: Bool = false {
         didSet {
             isScanning ? magnetometorService.start() : magnetometorService.stop()
@@ -28,9 +27,8 @@ struct MagnetView: View {
                         .font(AppFont.text.font)
                         .foregroundStyle(.gray80)
                         .padding(.top, 24)
-                        .padding(.horizontal, 16)
                     HStack {
-                        Text("\(String(format: "%.1f", magnetometorService.magneticStrength))%")
+                        Text("\(String(format: "%.1f", isScanning ? magnetometorService.magneticStrength : 0))")
                             .font(AppFont.custom(size: 64, weight: .semibold).font)
                             .foregroundStyle(.primaryApp)
                         Text("µT")
@@ -38,7 +36,7 @@ struct MagnetView: View {
                             .foregroundStyle(.primaryApp)
                     }
                     .padding(.top, 32)
-                    CustomProgressView(value: magnetometorService.magneticStrength / 1500, shape: Capsule())
+                    CustomProgressView(value: isScanning ? magnetometorService.magneticStrength / 300 : 0, shape: Capsule())
                         .frame(height: 33.0)
                         .padding(.top, 8)
                         .padding([.horizontal, .bottom], 16)
@@ -47,7 +45,7 @@ struct MagnetView: View {
                             .font(AppFont.smallText.font)
                             .foregroundStyle(.gray70)
                         Spacer()
-                        Text("1500")
+                        Text("300")
                             .font(AppFont.smallText.font)
                             .foregroundStyle(.gray70)
                     }
