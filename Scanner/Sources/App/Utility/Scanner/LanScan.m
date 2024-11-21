@@ -63,7 +63,9 @@
 @implementation LanScan
 
 - (id)initWithDelegate:(id<LANScanDelegate>)delegate {
+#ifdef DEBUG
     deb(@"init scanner");
+#endif
     self = [super init];
     if(self) {
 		self.delegate = delegate;
@@ -111,9 +113,9 @@
 }
 
 - (void)start {
-    
+#ifdef DEBUG
     deb(@"start scan for router: %@", [self getRouterIP]);
-
+#endif
     //Initializing the dictionary that holds the Brands name for each MAC Address
     self.brandDictionary = [[NSDictionary dictionaryWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"data" ofType:@"plist"]] mutableCopy];
     
@@ -144,7 +146,9 @@
 }
 
 - (void)stop {
+#ifdef DEBUG
     deb(@"stop scan");
+#endif
     [self.timer invalidate];
     self.timer = nil;
 }
@@ -537,7 +541,9 @@
     NSString *data = nil;
     CFDictionaryRef dict = CNCopyCurrentNetworkInfo((CFStringRef) DEFAULT_WIFI_INTERFACE);
     if (dict) {
+#ifdef DEBUG
         deb(@"AP Wifi: %@", dict);
+#endif
         data = [NSString stringWithString:(NSString *)CFDictionaryGetValue(dict, @"SSID")];
         CFRelease(dict);
     }
