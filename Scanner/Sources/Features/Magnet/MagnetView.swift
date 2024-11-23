@@ -11,6 +11,7 @@ struct MagnetView: View {
     @EnvironmentObject var iapViewModel: IAPViewModel
     
     @State private var showPaywall = false
+    @State private var paywallViewState: PaywallView.ViewState = .info
     @State private var isScanning: Bool = false {
         didSet {
             isScanning ? magnetometorService.start() : magnetometorService.stop()
@@ -61,6 +62,7 @@ struct MagnetView: View {
                     if iapViewModel.isSubscribed {
                         isScanning.toggle()
                     } else {
+                        paywallViewState = .info
                         showPaywall = true
                     }
                 }) {
@@ -84,6 +86,7 @@ struct MagnetView: View {
                 if !iapViewModel.isSubscribed {
                     ToolbarItem(placement: .topBarTrailing) {
                         Button(action: {
+                            paywallViewState = .subscriptions
                             showPaywall = true
                         }) {
                             Image(.premium)
@@ -93,8 +96,10 @@ struct MagnetView: View {
                 }
             }
             .onDisappear {
-                magnetometorService.stop()
-                isScanning = false
+                if isScanning {
+                    magnetometorService.stop()
+                    isScanning = false
+                }
             }
             .onChange(of: iapViewModel.subscriptionEndDate) { newValue in
                 if newValue > Date.now.timeIntervalSinceReferenceDate {
@@ -102,7 +107,7 @@ struct MagnetView: View {
                 }
             }
             .fullScreenCover(isPresented: $showPaywall, content: {
-                PaywallView(showPaywall: $showPaywall)
+                PaywallView(viewState: $paywallViewState, showPaywall: $showPaywall)
             })
         }
     }

@@ -127,7 +127,7 @@ struct SettingsView: View {
                 }
             }
             .fullScreenCover(isPresented: $showPaywall, content: {
-                PaywallView(showPaywall: $showPaywall)
+                PaywallView(viewState: .constant(.subscriptions), showPaywall: $showPaywall)
             })
         }
     }

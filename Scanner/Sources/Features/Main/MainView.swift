@@ -46,7 +46,7 @@ struct MainView: View {
                 .tag(4)
         }
         .fullScreenCover(isPresented: $showPaywall, content: {
-            PaywallView(showPaywall: $showPaywall)
+            PaywallView(viewState: .constant(.info), showPaywall: $showPaywall)
         })
         .environmentObject(iapViewModel)
         .onChange(of: iapViewModel.subscriptionEndDate) { newValue in

@@ -32,6 +32,7 @@ struct ScannerView: View {
     @ObservedObject private var bluetoothService = BluetoothService()
     @State private var viewState: ViewState = .bluetooth
     @State private var showPaywall = false
+    @State private var paywallViewState: PaywallView.ViewState = .info
     
     var body: some View {
         NavigationStack {
@@ -113,6 +114,7 @@ struct ScannerView: View {
                                 navigateToResult()
                             }
                         } else {
+                            paywallViewState = .info
                             showPaywall = true
                         }
                     }) {
@@ -155,6 +157,7 @@ struct ScannerView: View {
                 if !iapViewModel.isSubscribed {
                     ToolbarItem(placement: .topBarTrailing) {
                         Button(action: {
+                            paywallViewState = .subscriptions
                             showPaywall = true
                         }) {
                             Image(.premium)
@@ -169,7 +172,7 @@ struct ScannerView: View {
                 }
             }
             .fullScreenCover(isPresented: $showPaywall, content: {
-                PaywallView(showPaywall: $showPaywall)
+                PaywallView(viewState: $paywallViewState, showPaywall: $showPaywall)
             })
         }
     }

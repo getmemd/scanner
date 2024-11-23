@@ -13,6 +13,7 @@ struct CameraView: View {
     @StateObject private var model = CameraDataModel()
     @State private var selectedFilter = FilterType.red
     @State private var showPaywall = false
+    @State private var paywallViewState: PaywallView.ViewState = .info
     
     var body: some View {
         NavigationStack {
@@ -41,6 +42,7 @@ struct CameraView: View {
                                 await model.camera.start()
                             }
                         } else {
+                            paywallViewState = .info
                             showPaywall = true
                         }
                     }) {
@@ -87,6 +89,7 @@ struct CameraView: View {
                 if !iapViewModel.isSubscribed {
                     ToolbarItem(placement: .topBarTrailing) {
                         Button(action: {
+                            paywallViewState = .subscriptions
                             showPaywall = true
                         }) {
                             Image(.premium)
@@ -105,7 +108,7 @@ struct CameraView: View {
                 }
             }
             .fullScreenCover(isPresented: $showPaywall, content: {
-                PaywallView(showPaywall: $showPaywall)
+                PaywallView(viewState: $paywallViewState, showPaywall: $showPaywall)
             })
         }
     }

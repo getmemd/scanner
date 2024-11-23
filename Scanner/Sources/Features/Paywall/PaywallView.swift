@@ -9,15 +9,15 @@ import SwiftUI
 import StoreKit
 
 struct PaywallView: View {
-    enum PaywallViewState {
+    enum ViewState {
         case info
         case subscriptions
     }
     
-    @State private var viewState: PaywallViewState = .info
     @State private var isTrialDisabled: Bool = false
     @State private var selectedPlan: ProductType = .featureMonthlyTrial
     @State private var isBouncing: Bool = false
+    @Binding var viewState: ViewState
     @Binding var showPaywall: Bool
     @EnvironmentObject var viewModel: IAPViewModel
     
@@ -100,6 +100,6 @@ struct PaywallView: View {
 }
 
 #Preview {
-    PaywallView(showPaywall: .constant(true))
+    PaywallView(viewState: .constant(.info), showPaywall: .constant(true))
         .environmentObject(IAPViewModel())
 }
