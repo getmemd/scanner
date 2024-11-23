@@ -9,7 +9,7 @@ import SwiftUI
 
 struct PaywallSubscriptionsView: View {
     @Binding var isOn: Bool
-    @Binding var selectedPlan: SubscriptionType
+    @Binding var selectedPlan: ProductType
     
     var body: some View {
         ZStack {
@@ -26,7 +26,18 @@ struct PaywallSubscriptionsView: View {
                 .padding(.top, 16)
                 Spacer()
                 HStack(spacing: 8) {
-                    ForEach(SubscriptionType.allCases, id: \.self) { plan in
+                    ForEach(
+                        isOn ? [
+                            ProductType.featureYearly,
+                            .featureMonthly,
+                            .featureWeekly
+                        ] : [
+                            .featureYearlyTrial,
+                            .featureMonthlyTrial,
+                            .featureWeeklyTrial
+                        ],
+                        id: \.self
+                    ) { plan in
                         PaywallSubscriptionCardView(plan: plan, isSelected: selectedPlan == plan)
                             .onTapGesture {
                                 withAnimation {
@@ -49,5 +60,6 @@ struct PaywallSubscriptionsView: View {
 }
 
 #Preview {
-    PaywallSubscriptionsView(isOn: .constant(true), selectedPlan: .constant(.weekly))
+    PaywallSubscriptionsView(isOn: .constant(true), selectedPlan: .constant(.featureWeeklyTrial))
+        .environmentObject(IAPViewModel())
 }

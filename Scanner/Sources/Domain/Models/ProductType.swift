@@ -31,4 +31,28 @@ enum ProductType: String, Codable, CaseIterable {
             return AppConstants.featureYearlyTrialPackageID
         }
     }
+    
+    var title: String {
+        switch self {
+        case .featureWeekly, .featureWeeklyTrial:
+            return "Week"
+        case .featureMonthly, .featureMonthlyTrial:
+            return "Month"
+        case .featureYearly, .featureYearlyTrial:
+            return "Year"
+        }
+    }
+    
+    var description: String {
+        switch self {
+        case .featureWeekly:
+            return "Get weekly plan"
+        case .featureMonthly:
+            return "Get monthly plan"
+        case .featureYearly:
+            return "Get annual plan"
+        case .featureWeeklyTrial, .featureMonthlyTrial, .featureYearlyTrial:
+            return "Get 3 Days Free Trial"
+        }
+    }
 }

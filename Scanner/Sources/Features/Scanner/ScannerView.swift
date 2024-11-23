@@ -30,7 +30,7 @@ struct ScannerView: View {
     @EnvironmentObject var iapViewModel: IAPViewModel
     @ObservedObject private var viewModel = ScannerViewModel()
     @ObservedObject private var bluetoothService = BluetoothService()
-    @State private var viewState: ViewState = .wifi
+    @State private var viewState: ViewState = .bluetooth
     @State private var showPaywall = false
     
     var body: some View {
@@ -75,7 +75,9 @@ struct ScannerView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 16))
                 .padding(.vertical, 40)
                 Spacer()
-                RadarLoader()
+                if viewModel.isScanning || bluetoothService.isScanning {
+                    RadarLoader()
+                }
                 if (viewState == .wifi && viewModel.isScanning) || (
                     viewState == .bluetooth && bluetoothService.isScanning
                 ) {
@@ -150,12 +152,14 @@ struct ScannerView: View {
                         .font(AppFont.h4.font)
                         .foregroundStyle(.primaryApp)
                 }
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button(action: {
-                        showPaywall = true
-                    }) {
-                        Image(.premium)
-                            .foregroundStyle(.warning)
+                if !iapViewModel.isSubscribed {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button(action: {
+                            showPaywall = true
+                        }) {
+                            Image(.premium)
+                                .foregroundStyle(.warning)
+                        }
                     }
                 }
             }

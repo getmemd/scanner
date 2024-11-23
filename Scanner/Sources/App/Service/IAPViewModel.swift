@@ -16,6 +16,7 @@ final class IAPViewModel: ObservableObject {
     @Published private(set) var isPurchasing = false
     @Published private(set) var isLoadingSubs = true
     
+    @Published var localizedPrices: [ProductType: String] = [:]
     @Published var showingSubview = false
     @Published var showAlert = false
     
@@ -34,6 +35,15 @@ final class IAPViewModel: ObservableObject {
     private func initialSetup() async {
         do {
             offerings = try await Purchases.shared.offerings()
+            if let packages = offerings?.current?.availablePackages {
+                await MainActor.run {
+                    for package in packages {
+                        if let productType = ProductType.allCases.first(where: { $0.packageID == package.identifier }) {
+                            localizedPrices[productType] = package.storeProduct.localizedPriceString
+                        }
+                    }
+                }
+            }
             await self.checkStatus()
         } catch {
             print(error.localizedDescription)

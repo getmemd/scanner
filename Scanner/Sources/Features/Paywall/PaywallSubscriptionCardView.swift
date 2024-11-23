@@ -7,37 +7,11 @@
 
 import SwiftUI
 
-enum SubscriptionType: CaseIterable {
-    case yearly, monthly, weekly
-    
-    var title: String {
-        switch self {
-        case .yearly: return "Year"
-        case .monthly: return "Month"
-        case .weekly: return "Week"
-        }
-    }
-    
-    var price: String {
-        switch self {
-        case .yearly: return "$ 83.99"
-        case .monthly: return "$ 14.99"
-        case .weekly: return "$ 6.99"
-        }
-    }
-    
-    var description: String {
-        switch self {
-        case .yearly: return "Get annual plan"
-        case .monthly: return "Get monthly plan"
-        case .weekly: return "Get weekly plan"
-        }
-    }
-}
-
 struct PaywallSubscriptionCardView: View {
-    let plan: SubscriptionType
+    let plan: ProductType
     let isSelected: Bool
+    
+    @EnvironmentObject var iapViewModel: IAPViewModel
     
     var body: some View {
         VStack {
@@ -47,7 +21,7 @@ struct PaywallSubscriptionCardView: View {
                 .minimumScaleFactor(0.5)
                 .lineLimit(1)
             Spacer()
-            Text(plan.price)
+            Text(iapViewModel.localizedPrices[plan] ?? "Error")
                 .font(AppFont.h5.font)
                 .foregroundStyle(isSelected ? .gray0 : .gray80)
             Text(plan.description)
@@ -63,5 +37,6 @@ struct PaywallSubscriptionCardView: View {
 }
 
 #Preview {
-    PaywallSubscriptionCardView(plan: .weekly, isSelected: true)
+    PaywallSubscriptionCardView(plan: .featureWeeklyTrial, isSelected: true)
+        .environmentObject(IAPViewModel())
 }

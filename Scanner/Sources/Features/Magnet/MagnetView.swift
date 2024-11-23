@@ -81,12 +81,14 @@ struct MagnetView: View {
                         .font(AppFont.h4.font)
                         .foregroundStyle(.primaryApp)
                 }
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button(action: {
-                        showPaywall = true
-                    }) {
-                        Image(.premium)
-                            .foregroundStyle(.warning)
+                if !iapViewModel.isSubscribed {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button(action: {
+                            showPaywall = true
+                        }) {
+                            Image(.premium)
+                                .foregroundStyle(.warning)
+                        }
                     }
                 }
             }

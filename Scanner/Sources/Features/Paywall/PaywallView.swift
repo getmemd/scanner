@@ -16,7 +16,7 @@ struct PaywallView: View {
     
     @State private var viewState: PaywallViewState = .info
     @State private var isTrialDisabled: Bool = false
-    @State private var selectedPlan: SubscriptionType = .monthly
+    @State private var selectedPlan: ProductType = .featureMonthlyTrial
     @State private var isBouncing: Bool = false
     @Binding var showPaywall: Bool
     @EnvironmentObject var viewModel: IAPViewModel
@@ -29,17 +29,19 @@ struct PaywallView: View {
                         .font(AppFont.h4.font)
                         .foregroundStyle(.primaryApp)
                     Spacer()
-                    Button {
-                        showPaywall = false
-                    } label: {
-                        Image(.closeSquare)
-                            .resizable()
-                            .frame(width: 24, height: 24)
-                            .foregroundStyle(.gray80)
+                    if viewState == .subscriptions {
+                        Button {
+                            showPaywall = false
+                        } label: {
+                            Image(.closeSquare)
+                                .resizable()
+                                .frame(width: 24, height: 24)
+                                .foregroundStyle(.gray80)
+                        }
                     }
                 }
                 if viewState == .info {
-                    PaywallInfoView()
+                    PaywallInfoView(showPaywall: $showPaywall)
                 } else if viewState == .subscriptions {
                     PaywallSubscriptionsView(isOn: $isTrialDisabled, selectedPlan: $selectedPlan)
                 }
@@ -50,7 +52,7 @@ struct PaywallView: View {
                             viewState = .subscriptions
                         }
                     } else {
-                        purchaseProduct()
+                        viewModel.purchaseProduct(productType: selectedPlan)
                     }
                 } label: {
                     Text(viewState == .info ? "START TO CONTINUE" : "SUBSCRIBE")
@@ -61,12 +63,6 @@ struct PaywallView: View {
                         .background(.primaryApp)
                         .cornerRadius(12)
                 }
-//                .scaleEffect(isBouncing ? 1.1 : 1.0)
-//                .offset(y: isBouncing ? -10 : 0)
-//                .animation(.easeInOut(duration: 1).repeatForever(autoreverses: true), value: isBouncing)
-//                .onAppear {
-//                    isBouncing = true
-//                }
                 HStack {
                     Button {
                         Task {
@@ -95,19 +91,6 @@ struct PaywallView: View {
             .padding(.horizontal, 32)
             .background(.forth)
         }
-    }
-    
-    private func purchaseProduct() {
-        let productType: ProductType
-        switch selectedPlan {
-        case .yearly:
-            productType = isTrialDisabled ? .featureYearly : .featureYearlyTrial
-        case .monthly:
-            productType = isTrialDisabled ? .featureMonthly : .featureMonthlyTrial
-        case .weekly:
-            productType = isTrialDisabled ? .featureWeekly : .featureWeeklyTrial
-        }
-        viewModel.purchaseProduct(productType: productType)
     }
     
     private func generateHapticFeedback() {
