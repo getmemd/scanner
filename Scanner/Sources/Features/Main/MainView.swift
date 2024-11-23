@@ -8,8 +8,9 @@
 import SwiftUI
 
 struct MainView: View {
-    @EnvironmentObject var iapViewModel: IAPViewModel
     @State private var selection: Int = 2
+    @State private var showPaywall = false
+    @StateObject private var iapViewModel = IAPViewModel()
     
     var body: some View {
         TabView(selection:$selection) {
@@ -44,7 +45,24 @@ struct MainView: View {
                 }
                 .tag(4)
         }
+        .fullScreenCover(isPresented: $showPaywall, content: {
+            PaywallView(showPaywall: $showPaywall)
+        })
         .environmentObject(iapViewModel)
+        .onChange(of: iapViewModel.subscriptionEndDate) { newValue in
+            if newValue > Date.now.timeIntervalSinceReferenceDate {
+                showPaywall = false
+            }
+        }
+        .onAppear {
+            withAnimation {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                    if !iapViewModel.isSubscribed {
+                        showPaywall = true
+                    }
+                }
+            }
+        }
     }
 }
 

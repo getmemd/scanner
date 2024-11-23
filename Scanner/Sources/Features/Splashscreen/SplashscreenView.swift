@@ -19,7 +19,7 @@ struct SplashscreenView: View {
             Image(splashImages[currentIndex])
                 .resizable()
                 .scaledToFit()
-                .animation(.smooth(duration: 0.7), value: currentIndex)
+                .animation(.easeInOut(duration: 0.7), value: currentIndex)
                 .onAppear(perform: startTimer)
                 .onDisappear(perform: stopTimer)
         }

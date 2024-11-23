@@ -8,7 +8,8 @@
 import SwiftUI
 
 struct OnboardingView: View {
-    @Binding var isOnboardingActive: Bool
+    @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding: Bool = false
+
     @State private var currentPage = 0
     private let pages: [OnboardingPageViewModel] = [
         .init(
@@ -46,8 +47,7 @@ struct OnboardingView: View {
                         if currentPage < pages.count - 1 {
                             currentPage += 1
                         } else {
-                            StorageService.shared.setOnboardingShowed()
-                            isOnboardingActive = false
+                            hasSeenOnboarding = true
                         }
                     }
                 }
@@ -59,5 +59,5 @@ struct OnboardingView: View {
 }
 
 #Preview {
-    OnboardingView(isOnboardingActive: .constant(true))
+    OnboardingView()
 }

@@ -27,14 +27,6 @@ final class StorageService {
         userDefaults.set(false, forKey: Keys.firstTime)
     }
     
-    func isOnboardingShowed() -> Bool {
-        userDefaults.bool(forKey: Keys.onboardingShowed)
-    }
-    
-    func setOnboardingShowed() {
-        userDefaults.set(true, forKey: Keys.onboardingShowed)
-    }
-    
     func setHistoryForWifi(_ data: [Device<LanDeviceModel>]) {
         saveData(data, forKey: Keys.historyForWifi)
     }

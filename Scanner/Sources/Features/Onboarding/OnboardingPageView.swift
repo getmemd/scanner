@@ -16,6 +16,8 @@ struct OnboardingPageView: View {
     var body: some View {
         VStack {
             Image(viewModel.image)
+                .resizable()
+                .scaledToFit()
             VStack(alignment: .leading) {
                 Text(viewModel.title)
                     .font(AppFont.h4.font)
@@ -36,12 +38,6 @@ struct OnboardingPageView: View {
                         .frame(maxWidth: .infinity)
                         .background(.primaryApp)
                         .cornerRadius(12)
-                }
-                .scaleEffect(isBouncing ? 1.1 : 1.0)
-                .offset(y: isBouncing ? -10 : 0)
-                .animation(.easeInOut(duration: 1).repeatForever(autoreverses: true), value: isBouncing)
-                .onAppear {
-                    isBouncing = true
                 }
                 .padding(.bottom)
             }
