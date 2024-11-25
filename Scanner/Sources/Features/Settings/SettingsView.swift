@@ -45,7 +45,7 @@ struct SettingsView: View {
     @EnvironmentObject var iapViewModel: IAPViewModel
     @State private var showPaywall = false
     @State private var path: [OptionType] = []
-
+    
     var body: some View {
         NavigationStack(path: $path) {
             VStack(spacing: 0) {
@@ -60,10 +60,13 @@ struct SettingsView: View {
                             HStack {
                                 Image(option.icon)
                                 Text(option.text)
+                                    .font(AppFont.text.font)
+                                    .foregroundStyle(.gray80)
                                 Spacer()
                                 Image(.arrowRight)
                             }
                             .foregroundStyle(.gray80)
+                            .padding(8)
                         }
                         .listRowSeparatorTint(.third)
                     }
