@@ -8,7 +8,7 @@
 import Foundation
 
 final class ScannerViewModel: NSObject, ObservableObject {
-    @Published var connectedDevices = [Device<LanDeviceModel>]()
+    @Published var connectedDevices = [Device]()
     @Published var scanProgress: Float = 0.0
     @Published var isScanning: Bool = false
     @Published var isNavigatingToResults = false
@@ -53,26 +53,6 @@ final class ScannerViewModel: NSObject, ObservableObject {
         freeifaddrs(ifaddr)
         return address
     }
-    
-    func checkSecure() {
-        guard let lanHistory = StorageService.shared.getHistoryDataForWifi() else { return }
-        for (index, device) in connectedDevices.enumerated() {
-            if let historyDevice = lanHistory.first(where: { $0.device.ipAddress == device.device.ipAddress }) {
-                if historyDevice.isSecure != device.isSecure {
-                    DispatchQueue.main.async { [weak self] in
-                        self?.connectedDevices[index].isSecure = historyDevice.isSecure
-                    }
-                }
-            }
-        }
-        isScanning = false
-        isNavigatingToResults = true
-        var updatedHistory = lanHistory + connectedDevices
-        updatedHistory = updatedHistory.removingDuplicates {
-            $0.device.ipAddress == $1.device.ipAddress && Calendar.current.isDate($0.date, inSameDayAs: $1.date)
-        }
-        StorageService.shared.setHistoryForWifi(updatedHistory)
-    }
 }
 
 // MARK: - LANScanDelegate
@@ -84,11 +64,12 @@ extension ScannerViewModel: LANScanDelegate {
     
     func lanScanDidFindNewDevice(_ device: [AnyHashable : Any]!) {
         guard let device = device as? [AnyHashable : String] else { return }
-        let lanDevice = LanDeviceModel(device: device)
-        connectedDevices.append(Device<LanDeviceModel>(device: lanDevice, date: Date(), isSecure: lanDevice.mac != nil))
+        connectedDevices.append(Device(data: device))
     }
     
     func lanScanDidFinishScanning() {
-        checkSecure()
+        StorageService.shared.checkSecure(devices: &connectedDevices)
+        isScanning = false
+        isNavigatingToResults = true
     }
 }

@@ -9,9 +9,9 @@ import SwiftUI
 
 struct DetailLanView: View {
     @Environment(\.presentationMode) var presentationMode
-    @EnvironmentObject var deviceManager: DeviceManager<LanDeviceModel>
+    @EnvironmentObject var deviceManager: DeviceManager
     
-    @State var lanDevice: Device<LanDeviceModel>
+    @State var lanDevice: Device
     
     var body: some View {
         VStack {
@@ -20,10 +20,10 @@ struct DetailLanView: View {
                     Image(lanDevice.isSecure ? .checkSquare : .dangerSquare)
                         .foregroundColor(lanDevice.isSecure ? .success : .error)
                     VStack(alignment: .leading, spacing: 4) {
-                        Text(lanDevice.device.name)
+                        Text(lanDevice.name ?? "Unknown")
                             .font(AppFont.text.font)
                             .foregroundColor(.gray80)
-                        Text(lanDevice.device.ipAddress)
+                        Text(lanDevice.ipAddress)
                             .font(AppFont.smallText.font)
                             .foregroundColor(.gray60)
                     }
@@ -36,7 +36,7 @@ struct DetailLanView: View {
                         .font(AppFont.text.font)
                         .foregroundColor(.gray80)
                     Spacer()
-                    Text(lanDevice.device.ipAddress)
+                    Text(lanDevice.ipAddress)
                         .font(AppFont.smallText.font)
                         .foregroundColor(.gray60)
                 }
@@ -46,7 +46,7 @@ struct DetailLanView: View {
                         .font(AppFont.text.font)
                         .foregroundColor(.gray80)
                     Spacer()
-                    Text(lanDevice.device.mac ?? "Unknown")
+                    Text(lanDevice.mac ?? "Unknown")
                         .font(AppFont.smallText.font)
                         .foregroundColor(.gray60)
                 }
@@ -56,7 +56,7 @@ struct DetailLanView: View {
                         .font(AppFont.text.font)
                         .foregroundColor(.gray80)
                     Spacer()
-                    Text(lanDevice.device.brand)
+                    Text(lanDevice.brand)
                         .font(AppFont.smallText.font)
                         .foregroundColor(.gray60)
                 }
@@ -128,7 +128,7 @@ struct DetailLanView: View {
     }
     
     private func secureDevice() {
-        StorageService.shared.updateSpecificByIp(ipAddress: lanDevice.device.ipAddress)
+        StorageService.shared.updateDevice(id: lanDevice.id)
         lanDevice.isSecure.toggle()
         deviceManager.toggleSecureStatus(for: lanDevice)
     }
@@ -137,4 +137,14 @@ struct DetailLanView: View {
         let generator = UIImpactFeedbackGenerator(style: .medium)
         generator.impactOccurred()
     }
+}
+
+#Preview {
+    DetailLanView(lanDevice: .init(data: [
+        DEVICE_IP_ADDRESS : "192.168.1.1",
+        DEVICE_NAME : "Lan Device",
+        DEVICE_MAC : "00:1b:63:84:45:e6",
+        DEVICE_BRAND : "APPLE"
+    ]))
+        .environmentObject(DeviceManager())
 }

@@ -11,69 +11,57 @@ final class StorageService {
     static let shared = StorageService()
     
     private enum Keys {
-        static let historyForBluetooth = "HistoryForBluetooth"
-        static let historyForWifi = "HistoryForWifi"
-        static let onboardingShowed = "OnboardingShowed"
-        static let firstTime = "FirstTime"
+        static let historyForDevices = "HistoryForDevices"
     }
     
     private let userDefaults = UserDefaults.standard
-    
-    func isFirstTime() -> Bool {
-        userDefaults.bool(forKey: Keys.firstTime) == false ? false : true
-    }
-    
-    func setFirstTime() {
-        userDefaults.set(false, forKey: Keys.firstTime)
-    }
-    
-    func setHistoryForWifi(_ data: [Device<LanDeviceModel>]) {
-        saveData(data, forKey: Keys.historyForWifi)
-    }
-    
-    func setHistoryForBluetooth(_ data: [Device<BluetoothDeviceModel>]) {
-        saveData(data, forKey: Keys.historyForBluetooth)
-    }
-    
-    func removeWifi() {
-        userDefaults.removeObject(forKey: Keys.historyForWifi)
-    }
-    
-    func removeBluetooth() {
-        userDefaults.removeObject(forKey: Keys.historyForBluetooth)
-    }
-    
-    func removeAll() {
-        removeWifi()
-        removeBluetooth()
-    }
-    
-    func updateSpecificById(id: UUID) {
-        var bleDevices = getHistoryDataForBluetooth()
-        for (index, device) in bleDevices?.enumerated() ?? [].enumerated() {
-            if device.device.id == id {
-                bleDevices?[index].isSecure.toggle()
-            }
-        }
-        setHistoryForBluetooth(bleDevices ?? [])
-    }
 
-    func updateSpecificByIp(ipAddress: String) {
-        var lanDevices = getHistoryDataForWifi()
-        for (index, device) in lanDevices?.enumerated() ?? [].enumerated() {
-            if device.device.ipAddress == ipAddress {
-                lanDevices?[index].isSecure.toggle()
+    func removeHistory() {
+        userDefaults.removeObject(forKey: Keys.historyForDevices)
+    }
+    
+    func removeHistoryItem(id: UUID) {
+        var devices = getHistory()
+        for (index, device) in devices.enumerated() {
+            if device.id == id {
+                devices.remove(at: index)
             }
         }
-        setHistoryForWifi(lanDevices ?? [])
+        setHistory(data: devices)
     }
     
-    func getHistoryDataForWifi() -> [Device<LanDeviceModel>]? {
-        loadData(forKey: Keys.historyForWifi)
+    func getHistory() -> [Device] {
+        loadData(forKey: Keys.historyForDevices) ?? []
     }
     
-    func getHistoryDataForBluetooth() -> [Device<BluetoothDeviceModel>]? {
-        loadData(forKey: Keys.historyForBluetooth)
+    func setHistory(data: [Device]) {
+        saveData(data, forKey: Keys.historyForDevices)
+    }
+    
+    func updateDevice(id: UUID) {
+        var devices = getHistory()
+        for (index, device) in devices.enumerated() {
+            if device.id == id {
+                devices[index].isSecure.toggle()
+            }
+        }
+        setHistory(data: devices)
+    }
+    
+    func checkSecure(devices: inout [Device]) {
+        let history = StorageService.shared.getHistory()
+        for (index, device) in devices.enumerated() {
+            if let historyDevice = history.first(where: { $0.id == device.id }) {
+                if historyDevice.isSecure != device.isSecure {
+                    devices[index].isSecure = historyDevice.isSecure
+                }
+            }
+        }
+        var updatedHistory = history + devices
+        updatedHistory = updatedHistory.removingDuplicates {
+            $0.id == $1.id && Calendar.current.isDate($0.date, inSameDayAs: $1.date)
+        }
+        StorageService.shared.setHistory(data: updatedHistory)
     }
     
     private func saveData<T: Codable>(_ data: [T], forKey key: String) {

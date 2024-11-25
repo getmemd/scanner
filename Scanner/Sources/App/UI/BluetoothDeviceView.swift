@@ -8,19 +8,20 @@
 import SwiftUI
 
 struct BluetoothDeviceView: View {
-    @State var selectedDevice: Device<BluetoothDeviceModel>
+    @State var device: Device
     
     var body: some View {
         HStack {
-            Image(selectedDevice.isSecure ? .checkSquare : .dangerSquare)
-                .foregroundStyle(selectedDevice.isSecure ? .success : .error)
+            Image(device.isSecure ? .checkSquare : .dangerSquare)
+                .foregroundStyle(device.isSecure ? .success : .error)
             VStack(alignment: .leading) {
-                Text(selectedDevice.device.name ?? "Unknown device")
+                Text(device.name ?? "Unknown device")
                     .font(AppFont.text.font)
                     .foregroundStyle(.gray80)
-                Text(selectedDevice.device.id.uuidString)
+                Text(device.id.uuidString)
                     .font(AppFont.smallText.font)
                     .foregroundStyle(.gray60)
+                    .multilineTextAlignment(.leading)
             }
             Spacer()
             Text(calculateDistance())
@@ -29,10 +30,15 @@ struct BluetoothDeviceView: View {
             Image(.arrowRight)
                 .foregroundStyle(.gray80)
         }
+        .padding(16)
     }
     
     private func calculateDistance() -> String {
-        guard let rssi = selectedDevice.device.rssi else { return "" }
+        guard let rssi = device.rssi else { return "" }
         return String(format: "%.2f m", pow(10.0, Double(-59 - rssi) / (10 * 2)))
     }
+}
+
+#Preview {
+    BluetoothDeviceView(device: .init(id: .init(), name: nil, rssi: 0))
 }

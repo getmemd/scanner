@@ -41,13 +41,14 @@ struct SettingsView: View {
     }
     
     @Environment(\.requestReview) var requestReview
+    @Environment(\.openURL) var openURL
     @EnvironmentObject var iapViewModel: IAPViewModel
     @State private var showPaywall = false
     @State private var path: [OptionType] = []
 
     var body: some View {
         NavigationStack(path: $path) {
-            VStack {
+            VStack(spacing: 0) {
                 Text("Settings")
                     .font(AppFont.h4.font)
                     .foregroundStyle(.primaryApp)
@@ -94,7 +95,6 @@ struct SettingsView: View {
                                 .padding()
                         }
                     }
-                    
                     .background(.gray0)
                     .clipShape(.rect(cornerRadius: 16))
                     .overlay(
@@ -107,17 +107,11 @@ struct SettingsView: View {
             .background(Color.forth)
             .navigationDestination(for: OptionType.self) { option in
                 switch option {
-                case .review:
-                    EmptyView()
-                case .share:
-                    EmptyView()
-                case .restore:
-                    EmptyView()
                 case .terms:
                     InfoView(viewState: .terms)
                 case .privacy:
                     InfoView(viewState: .privacy)
-                case .contact:
+                default:
                     EmptyView()
                 }
             }
@@ -139,30 +133,34 @@ struct SettingsView: View {
         case .share:
             shareApp()
         case .restore:
-            Task {
-                do {
-                    try await restorePurchases()
-                } catch {
-                    print(error)
-                }
-            }
+            restorePurchases()
         case .terms, .privacy:
             path = [option]
-        default:
-            break
+        case .contact:
+            mailTo()
         }
     }
     
     private func shareApp() {
-        let url = URL(string: "https://apple.com")
-        let activityController = UIActivityViewController(activityItems: [url!], applicationActivities: nil)
+        guard let url = URL(string: AppConstants.appLink) else { return }
+        let activityController = UIActivityViewController(activityItems: [url], applicationActivities: nil)
         let scenes = UIApplication.shared.connectedScenes
         let windowScene = scenes.first as? UIWindowScene
         windowScene?.windows.first?.rootViewController?.present(activityController, animated: true, completion: nil)
     }
     
-    private func restorePurchases() async throws {
-        try await StoreKit.AppStore.sync()
+    private func mailTo() {
+        let mailto = "mailto:\(AppConstants.email)".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
+        print(mailto ?? "")
+        if let url = URL(string: mailto!) {
+            openURL(url)
+        }
+    }
+    
+    private func restorePurchases() {
+        Task {
+            await iapViewModel.restore()
+        }
     }
     
     private func generateHapticFeedback() {

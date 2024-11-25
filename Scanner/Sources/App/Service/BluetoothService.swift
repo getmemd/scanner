@@ -9,11 +9,11 @@ import SwiftUI
 import CoreBluetooth
 
 final class BluetoothService: NSObject, CBCentralManagerDelegate, ObservableObject {
-    @Published var discoveredDevices = [Device<BluetoothDeviceModel>]()
+    @Published var discoveredDevices = [Device]()
     @Published var isScanning = false
     
     var centralManager: CBCentralManager!
-    private var discoveredDevicesDict = [CBPeripheral: Device<BluetoothDeviceModel>]()
+    private var discoveredDevicesDict = [CBPeripheral: Device]()
     
     override init() {
         super.init()
@@ -51,26 +51,7 @@ final class BluetoothService: NSObject, CBCentralManagerDelegate, ObservableObje
     }
     
     func checkSecure() {
-        guard let bluetoothHistory = StorageService.shared.getHistoryDataForBluetooth() else { return }
-        DispatchQueue.main.async {
-            for (index, device) in self.discoveredDevices.enumerated() {
-                if let historyDevice = bluetoothHistory.first(where: { $0.device.id == device.device.id }) {
-                    if historyDevice.isSecure != device.isSecure {
-                        self.discoveredDevices[index].isSecure = historyDevice.isSecure
-                    }
-                }
-            }
-            let modifiedDevices = self.discoveredDevices.map { device in
-                var modifiedDevice = device
-                modifiedDevice.device.rssi = nil
-                return modifiedDevice
-            }
-            var updatedHistory = bluetoothHistory + modifiedDevices
-            updatedHistory = updatedHistory.removingDuplicates {
-                $0.device.id == $1.device.id && Calendar.current.isDate($0.date, inSameDayAs: $1.date)
-            }
-            StorageService.shared.setHistoryForBluetooth(updatedHistory)
-        }
+        StorageService.shared.checkSecure(devices: &discoveredDevices)
     }
     
     func centralManagerDidUpdateState(_ central: CBCentralManager) { }
@@ -81,12 +62,11 @@ final class BluetoothService: NSObject, CBCentralManagerDelegate, ObservableObje
                         rssi RSSI: NSNumber) {
         if let existingDevice = discoveredDevicesDict[peripheral] {
             var updatedDevice = existingDevice
-            updatedDevice.device.rssi = RSSI.intValue
+            updatedDevice.rssi = RSSI.intValue
             discoveredDevicesDict[peripheral] = updatedDevice
             discoveredDevices = Array(discoveredDevicesDict.values)
         } else {
-            let device = BluetoothDeviceModel(id: peripheral.identifier, name: peripheral.name, rssi: RSSI.intValue)
-            let newDevice = Device(device: device, date: Date(), isSecure: device.name != nil)
+            let newDevice = Device(id: peripheral.identifier, name: peripheral.name, rssi: RSSI.intValue)
             discoveredDevicesDict[peripheral] = newDevice
             discoveredDevices = Array(discoveredDevicesDict.values)
         }

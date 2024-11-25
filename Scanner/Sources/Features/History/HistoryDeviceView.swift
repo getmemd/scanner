@@ -1,24 +1,24 @@
 //
-//  LanDeviceView.swift
+//  HistoryDeviceView.swift
 //  Scanner
 //
-//  Created by Adilkhan Medeuyev on 05.11.2024.
+//  Created by Adilkhan Medeuyev on 25.11.2024.
 //
 
 import SwiftUI
 
-struct LanDeviceView: View {
-    @State var device: Device
+struct HistoryDeviceView: View {
+    var device: Device
     
     var body: some View {
         HStack {
-            Image(device.isSecure ? .checkSquare : .dangerSquare)
+            Image(device.type == .bluetooth ? .bluetooth : .homeWifi)
                 .foregroundStyle(device.isSecure ? .success : .error)
             VStack(alignment: .leading) {
                 Text(device.name ?? "Unknown")
                     .font(AppFont.text.font)
                     .foregroundStyle(.gray80)
-                Text(device.ipAddress)
+                Text(device.type == .bluetooth ? device.id.uuidString : device.ipAddress)
                     .font(AppFont.smallText.font)
                     .foregroundStyle(.gray60)
                     .multilineTextAlignment(.leading)
@@ -27,6 +27,9 @@ struct LanDeviceView: View {
             Image(.arrowRight)
                 .foregroundStyle(.gray80)
         }
-        .padding(16)
     }
+}
+
+#Preview {
+    HistoryDeviceView(device: .init(id: .init(), name: "Device", rssi: 1))
 }

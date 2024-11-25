@@ -15,6 +15,7 @@ struct AppConstants {
     static let featureWeeklyTrialPackageID = "weekly_trial"
     static let featureMonthlyTrialPackageID = "monthly_trial"
     static let featureYearlyTrialPackageID = "annual_trial"
-    static let appLink = " "
+    static let appLink = "https://www.apple.com"
     static let appID = " "
+    static let email = "test@gmail.com"
 }

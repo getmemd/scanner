@@ -7,24 +7,24 @@
 
 import Foundation
 
-final class DeviceManager<T: Codable>: ObservableObject {
-    @Published var devices: [Device<T>]
+final class DeviceManager: ObservableObject {
+    @Published var devices: [Device]
     
-    init(devices: [Device<T>] = []) {
+    init(devices: [Device] = []) {
         self.devices = devices
     }
     
-    func toggleSecureStatus(for device: Device<T>) {
+    func toggleSecureStatus(for device: Device) {
         if let index = devices.firstIndex(where: { $0.id == device.id }) {
             devices[index].isSecure.toggle()
         }
     }
     
-    func devicesFiltered(by isSecure: Bool) -> [Device<T>] {
+    func devicesFiltered(by isSecure: Bool) -> [Device] {
         devices.filter { $0.isSecure == isSecure }
     }
     
-    func deleteDevice(_ device: Device<T>) {
+    func deleteDevice(_ device: Device) {
         devices.removeAll { $0.id == device.id }
     }
 }

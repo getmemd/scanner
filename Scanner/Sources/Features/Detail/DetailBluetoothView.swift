@@ -9,10 +9,10 @@ import SwiftUI
 
 struct DetailBluetoothView: View {
     @Environment(\.presentationMode) var presentationMode
-    @EnvironmentObject var deviceManager: DeviceManager<BluetoothDeviceModel>
+    @EnvironmentObject var deviceManager: DeviceManager
     @State private var proximity = 0
     
-    @State var bleDevice: Device<BluetoothDeviceModel>
+    @State var bleDevice: Device
     
     var body: some View {
         VStack(spacing: 16) {
@@ -21,10 +21,10 @@ struct DetailBluetoothView: View {
                     Image(bleDevice.isSecure ? .checkSquare : .dangerSquare)
                         .foregroundColor(bleDevice.isSecure ? .success : .error)
                     VStack(alignment: .leading, spacing: 4) {
-                        Text(bleDevice.device.name ?? "Unknown")
+                        Text(bleDevice.name ?? "Unknown")
                             .font(AppFont.text.font)
                             .foregroundColor(.gray80)
-                        Text(bleDevice.device.id.uuidString)
+                        Text(bleDevice.id.uuidString)
                             .font(AppFont.smallText.font)
                             .foregroundColor(.gray60)
                     }
@@ -114,7 +114,7 @@ struct DetailBluetoothView: View {
     }
     
     private func calculateProximityPercentage() {
-        guard let rssi = bleDevice.device.rssi else { return }
+        guard let rssi = bleDevice.rssi else { return }
         let minRSSI = -100
         let maxRSSI = -40
         let clampedRSSI = max(min(rssi, maxRSSI), minRSSI)
@@ -123,7 +123,7 @@ struct DetailBluetoothView: View {
     }
     
     private func secureDevice() {
-        StorageService.shared.updateSpecificById(id: bleDevice.device.id)
+        StorageService.shared.updateDevice(id: bleDevice.id)
         bleDevice.isSecure.toggle()
         deviceManager.toggleSecureStatus(for: bleDevice)
     }
@@ -132,4 +132,8 @@ struct DetailBluetoothView: View {
         let generator = UIImpactFeedbackGenerator(style: .medium)
         generator.impactOccurred()
     }
+}
+
+#Preview {
+    DetailBluetoothView(bleDevice: .init(id: .init(), name: "AirPods", rssi: 0))
 }

@@ -7,26 +7,29 @@
 
 import SwiftUI
 
-struct ResultView<T: Codable>: View {
+struct ResultView: View {
     @Environment(\.presentationMode) var presentationMode
-    @EnvironmentObject var deviceManager: DeviceManager<T>
+    @EnvironmentObject var deviceManager: DeviceManager
     
     var body: some View {
         ScrollView {
-            HStack {
-                Text("Found devices: \(deviceManager.devices.count)")
-                    .font(AppFont.h5.font)
-                    .foregroundColor(.gray90)
-                Spacer()
-                Text("Dubious devices: \(deviceManager.devicesFiltered(by: false).count)")
-                    .font(AppFont.h5.font)
-                    .foregroundColor(.error)
+            VStack {
+                HStack {
+                    Text("Found devices: \(deviceManager.devices.count)")
+                        .font(AppFont.h5.font)
+                        .foregroundColor(.gray90)
+                    Spacer()
+                    Text("Dubious devices: \(deviceManager.devicesFiltered(by: false).count)")
+                        .font(AppFont.h5.font)
+                        .foregroundColor(.error)
+                }
+                VStack {
+                    deviceSection(isSecure: false)
+                    deviceSection(isSecure: true)
+                }
             }
-            DeviceListView<T>()
-                .environmentObject(deviceManager)
-            Spacer()
+            .padding()
         }
-        .padding()
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
@@ -46,5 +49,61 @@ struct ResultView<T: Codable>: View {
                 }
             }
         }
+        .toolbar(.hidden, for: .tabBar)
     }
+    
+    @ViewBuilder
+    private func deviceSection(isSecure: Bool) -> some View {
+        VStack {
+            ForEach(deviceManager.devicesFiltered(by: isSecure)) { device in
+                VStack {
+                    deviceRow(for: device)
+                    Divider()
+                        .foregroundStyle(.third)
+                        .padding(.horizontal)
+                }
+            }
+        }
+        .background(.gray0)
+        .overlay {
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(isSecure ? .success : .error, lineWidth: 1)
+        }
+    }
+    
+    @ViewBuilder
+    private func deviceRow(for device: Device) -> some View {
+        switch device.type {
+        case .bluetooth:
+            NavigationLink(
+                destination: DetailBluetoothView(bleDevice: device)
+                    .environmentObject(deviceManager)
+            ) {
+                BluetoothDeviceView(device: device)
+            }
+        case .lan:
+            NavigationLink(
+                destination: DetailLanView(lanDevice: device)
+                    .environmentObject(deviceManager)
+            ) {
+                LanDeviceView(device: device)
+            }
+        }
+    }
+}
+
+#Preview {
+    ResultView()
+        .environmentObject(DeviceManager(devices: [
+            .init(id: UUID(), name: nil, rssi: 10),
+            .init(id: UUID(), name: nil, rssi: 10),
+            .init(id: UUID(), name: nil, rssi: 10),
+            .init(id: UUID(), name: nil, rssi: 10),
+            .init(id: UUID(), name: nil, rssi: 10),
+            .init(id: UUID(), name: nil, rssi: 10),
+            .init(id: UUID(), name: nil, rssi: 10),
+            .init(id: UUID(), name: nil, rssi: 10),
+            .init(id: UUID(), name: nil, rssi: 10),
+            .init(id: UUID(), name: "Some device", rssi: 100)
+        ]))
 }

@@ -137,14 +137,14 @@ struct ScannerView: View {
             .navigationDestination(isPresented: $viewModel.isNavigatingToResults) {
                 switch viewState {
                 case .wifi:
-                    ResultView<LanDeviceModel>()
+                    ResultView()
                         .environmentObject(
-                            DeviceManager<LanDeviceModel>(devices: viewModel.connectedDevices)
+                            DeviceManager(devices: viewModel.connectedDevices)
                         )
                 case .bluetooth:
-                    ResultView<BluetoothDeviceModel>()
+                    ResultView()
                         .environmentObject(
-                            DeviceManager<BluetoothDeviceModel>(devices: bluetoothService.discoveredDevices)
+                            DeviceManager(devices: bluetoothService.discoveredDevices)
                         )
                 }
             }
