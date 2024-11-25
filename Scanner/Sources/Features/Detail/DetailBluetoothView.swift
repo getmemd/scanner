@@ -10,6 +10,7 @@ import SwiftUI
 struct DetailBluetoothView: View {
     @Environment(\.presentationMode) var presentationMode
     @EnvironmentObject var deviceManager: DeviceManager
+    @EnvironmentObject var tabManager: TabManager
     @State private var proximity = 0
     
     @State var bleDevice: Device
@@ -52,6 +53,7 @@ struct DetailBluetoothView: View {
             Spacer()
             Button(action: {
                 generateHapticFeedback()
+                tabManager.selectedTab = 1
             }) {
                 Text("SEARCH")
                     .font(AppFont.button.font)
@@ -108,6 +110,7 @@ struct DetailBluetoothView: View {
                 }
             }
         }
+        .toolbar(.hidden, for: .tabBar)
         .onAppear {
             calculateProximityPercentage()
         }
@@ -136,4 +139,6 @@ struct DetailBluetoothView: View {
 
 #Preview {
     DetailBluetoothView(bleDevice: .init(id: .init(), name: "AirPods", rssi: 0))
+        .environmentObject(DeviceManager())
+        .environmentObject(TabManager())
 }

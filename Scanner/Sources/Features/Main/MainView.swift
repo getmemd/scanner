@@ -8,12 +8,12 @@
 import SwiftUI
 
 struct MainView: View {
-    @State private var selection: Int = 2
     @State private var showPaywall = false
+    @StateObject private var tabManager = TabManager()
     @StateObject private var iapViewModel = IAPViewModel()
     
     var body: some View {
-        TabView(selection:$selection) {
+        TabView(selection: $tabManager.selectedTab) {
             HistoryView()
                 .tabItem {
                     Image(.history)
@@ -48,6 +48,7 @@ struct MainView: View {
         .fullScreenCover(isPresented: $showPaywall, content: {
             PaywallView(viewState: .constant(.info), showPaywall: $showPaywall)
         })
+        .environmentObject(tabManager)
         .environmentObject(iapViewModel)
         .onChange(of: iapViewModel.subscriptionEndDate) { newValue in
             if newValue > Date.now.timeIntervalSinceReferenceDate {

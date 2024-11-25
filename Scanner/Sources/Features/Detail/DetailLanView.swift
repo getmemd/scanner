@@ -125,6 +125,7 @@ struct DetailLanView: View {
         .navigationBarBackButtonHidden(true)
         .navigationBarTitleDisplayMode(.inline)
         .background(Color.forth.ignoresSafeArea())
+        .toolbar(.hidden, for: .tabBar)
     }
     
     private func secureDevice() {

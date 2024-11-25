@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct HistoryEmptyView: View {
+    @EnvironmentObject private var tabManager: TabManager
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("You have no search history yet")
@@ -21,7 +23,8 @@ struct HistoryEmptyView: View {
         VStack {
             Button(action: {
                 generateHapticFeedback()
-                // Действие для перехода к сканированию Wi-Fi
+                tabManager.selectedTab = 2
+                tabManager.scannerViewState = .wifi
             }) {
                 Text("SEARCH DEVICES ON SHARED WI-FI")
                     .font(AppFont.button.font)
@@ -33,7 +36,8 @@ struct HistoryEmptyView: View {
             }
             Button(action: {
                 generateHapticFeedback()
-                // Действие для перехода к сканированию Bluetooth
+                tabManager.selectedTab = 2
+                tabManager.scannerViewState = .bluetooth
             }) {
                 Text("SEARCH FOR BLUETOOTH DEVICES")
                     .font(AppFont.button.font)
@@ -55,4 +59,5 @@ struct HistoryEmptyView: View {
 
 #Preview {
     HistoryEmptyView()
+        .environmentObject(TabManager())
 }

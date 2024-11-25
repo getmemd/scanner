@@ -28,9 +28,11 @@ struct ScannerView: View {
     }
     
     @EnvironmentObject var iapViewModel: IAPViewModel
+    @EnvironmentObject var tabManager: TabManager
+    
     @ObservedObject private var viewModel = ScannerViewModel()
     @ObservedObject private var bluetoothService = BluetoothService()
-    @State private var viewState: ViewState = .bluetooth
+    
     @State private var showPaywall = false
     @State private var paywallViewState: PaywallView.ViewState = .info
     
@@ -40,7 +42,7 @@ struct ScannerView: View {
                 HStack(spacing: 4) {
                     Button(action: {
                         generateHapticFeedback()
-                        viewState = .wifi
+                        tabManager.scannerViewState = .wifi
                         if bluetoothService.isScanning {
                             bluetoothService.stopScan()
                         }
@@ -52,12 +54,12 @@ struct ScannerView: View {
                         }
                         .padding()
                         .frame(maxWidth: .infinity)
-                        .background(viewState == .wifi ? .second : .third)
-                        .foregroundStyle(viewState == .wifi ? .gray0 : .gray70)
+                        .background(tabManager.scannerViewState == .wifi ? .second : .third)
+                        .foregroundStyle(tabManager.scannerViewState == .wifi ? .gray0 : .gray70)
                     }
                     Button(action: {
                         generateHapticFeedback()
-                        viewState = .bluetooth
+                        tabManager.scannerViewState = .bluetooth
                         if viewModel.isScanning {
                             viewModel.stopScan()
                         }
@@ -69,8 +71,8 @@ struct ScannerView: View {
                         }
                         .padding()
                         .frame(maxWidth: .infinity)
-                        .background(viewState == .bluetooth ? .second : .third)
-                        .foregroundStyle(viewState == .bluetooth ? .gray0 : .gray70)
+                        .background(tabManager.scannerViewState == .bluetooth ? .second : .third)
+                        .foregroundStyle(tabManager.scannerViewState == .bluetooth ? .gray0 : .gray70)
                     }
                 }
                 .clipShape(RoundedRectangle(cornerRadius: 16))
@@ -79,17 +81,17 @@ struct ScannerView: View {
                 if viewModel.isScanning || bluetoothService.isScanning {
                     RadarLoader()
                 }
-                if (viewState == .wifi && viewModel.isScanning) || (
-                    viewState == .bluetooth && bluetoothService.isScanning
+                if (tabManager.scannerViewState == .wifi && viewModel.isScanning) || (
+                    tabManager.scannerViewState == .bluetooth && bluetoothService.isScanning
                 ) {
                     Spacer()
                     HStack {
-                        Text("Unknown devices detected: \(viewState == .wifi ? viewModel.connectedDevices.count : bluetoothService.discoveredDevices.count)")
+                        Text("Unknown devices detected: \(tabManager.scannerViewState == .wifi ? viewModel.connectedDevices.count : bluetoothService.discoveredDevices.count)")
                             .font(AppFont.text.font)
                             .foregroundColor(.gray90)
                         Spacer()
                     }
-                    if viewState == .wifi {
+                    if tabManager.scannerViewState == .wifi {
                         VStack(alignment: .leading) {
                             Text("Your IP: \(viewModel.getIpAddress() ?? "unknown")")
                                 .font(AppFont.smallText.font)
@@ -106,7 +108,7 @@ struct ScannerView: View {
                     Button(action: {
                         generateHapticFeedback()
                         if iapViewModel.isSubscribed {
-                            switch viewState {
+                            switch tabManager.scannerViewState {
                             case .wifi:
                                 viewModel.reload()
                             case .bluetooth:
@@ -118,7 +120,7 @@ struct ScannerView: View {
                             showPaywall = true
                         }
                     }) {
-                        Text(viewState.buttonTitle)
+                        Text(tabManager.scannerViewState.buttonTitle)
                             .font(AppFont.button.font)
                             .foregroundColor(.gray10)
                             .padding()
@@ -131,11 +133,15 @@ struct ScannerView: View {
             .padding([.bottom, .horizontal], 32)
             .background(Color.forth.ignoresSafeArea())
             .onDisappear {
-                bluetoothService.stopScan()
-                viewModel.stopScan()
+                if viewModel.isScanning {
+                    viewModel.stopScan()
+                }
+                if bluetoothService.isScanning {
+                    bluetoothService.stopScan()
+                }
             }
             .navigationDestination(isPresented: $viewModel.isNavigatingToResults) {
-                switch viewState {
+                switch tabManager.scannerViewState {
                 case .wifi:
                     ResultView()
                         .environmentObject(
@@ -150,7 +156,7 @@ struct ScannerView: View {
             }
             .toolbar {
                 ToolbarItem(placement: .navigation) {
-                    Text(viewState.title)
+                    Text(tabManager.scannerViewState.title)
                         .font(AppFont.h4.font)
                         .foregroundStyle(.primaryApp)
                 }
@@ -193,4 +199,5 @@ struct ScannerView: View {
 #Preview {
     ScannerView()
         .environmentObject(IAPViewModel())
+        .environmentObject(TabManager())
 }
