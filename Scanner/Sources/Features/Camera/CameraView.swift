@@ -12,8 +12,10 @@ struct CameraView: View {
     
     @StateObject private var model = CameraDataModel()
     @State private var selectedFilter = FilterType.red
-    @State private var showPaywall = false
     @State private var paywallViewState: PaywallView.ViewState = .info
+    @State private var showPaywall = false
+    @State private var showAlert = false
+    @State private var alertMessage = ""
     
     var body: some View {
         NavigationStack {
@@ -39,8 +41,13 @@ struct CameraView: View {
                         generateHapticFeedback()
                         if iapViewModel.isSubscribed {
                             Task {
-                                await model.camera.start()
+                                do {
+                                    try await model.camera.start()
+                                } catch {
+                                    showAlertWith(message: error.localizedDescription)
+                                }
                             }
+                            
                         } else {
                             paywallViewState = .info
                             showPaywall = true
@@ -110,6 +117,28 @@ struct CameraView: View {
             .fullScreenCover(isPresented: $showPaywall, content: {
                 PaywallView(viewState: $paywallViewState, showPaywall: $showPaywall)
             })
+            .alert(isPresented: $showAlert) {
+                Alert(
+                    title: Text("Camera Access Required"),
+                    message: Text(alertMessage),
+                    primaryButton: .default(Text("Settings")) {
+                        openAppSettings()
+                    },
+                    secondaryButton: .cancel(Text("Cancel"))
+                )
+            }
+        }
+    }
+    
+    private func showAlertWith(message: String) {
+        alertMessage = message
+        showAlert = true
+    }
+    
+    private func openAppSettings() {
+        guard let settingsURL = URL(string: UIApplication.openSettingsURLString) else { return }
+        if UIApplication.shared.canOpenURL(settingsURL) {
+            UIApplication.shared.open(settingsURL)
         }
     }
     

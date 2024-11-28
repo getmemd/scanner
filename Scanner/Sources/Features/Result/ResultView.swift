@@ -12,23 +12,54 @@ struct ResultView: View {
     @EnvironmentObject var deviceManager: DeviceManager
     
     var body: some View {
-        ScrollView {
-            VStack {
-                HStack {
-                    Text("Found devices: \(deviceManager.devices.count)")
-                        .font(AppFont.h5.font)
-                        .foregroundColor(.gray90)
-                    Spacer()
-                    Text("Dubious devices: \(deviceManager.devicesFiltered(by: false).count)")
-                        .font(AppFont.h5.font)
-                        .foregroundColor(.error)
-                }
+        NavigationStack {
+            if !deviceManager.devices.isEmpty {
                 VStack {
-                    deviceSection(isSecure: false)
-                    deviceSection(isSecure: true)
+                    Spacer()
+                    SplashscreenView()
+                    Spacer()
+                    VStack(spacing: 0) {
+                        Text("No devices detected")
+                            .font(AppFont.h5.font)
+                            .foregroundColor(.gray100)
+                        Text("Please, try again")
+                            .font(AppFont.text.font)
+                            .foregroundColor(.gray70)
+                    }
+                    Button(action: {
+                        generateHapticFeedback()
+                        presentationMode.wrappedValue.dismiss()
+                    }) {
+                        Text("SEARCH")
+                            .font(AppFont.button.font)
+                            .foregroundColor(.gray10)
+                            .padding()
+                            .frame(maxWidth: .infinity)
+                            .background(.primaryApp)
+                            .cornerRadius(12)
+                    }
+                }
+                .padding()
+            } else {
+                ScrollView {
+                    VStack {
+                        HStack {
+                            Text("Found devices: \(deviceManager.devices.count)")
+                                .font(AppFont.h5.font)
+                                .foregroundColor(.gray90)
+                            Spacer()
+                            Text("Dubious devices: \(deviceManager.devicesFiltered(by: false).count)")
+                                .font(AppFont.h5.font)
+                                .foregroundColor(.error)
+                        }
+                        VStack {
+                            deviceSection(isSecure: false)
+                            deviceSection(isSecure: true)
+                        }
+                    }
+                    .padding()
                 }
             }
-            .padding()
         }
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
@@ -90,20 +121,25 @@ struct ResultView: View {
             }
         }
     }
+    
+    private func generateHapticFeedback() {
+        let generator = UIImpactFeedbackGenerator(style: .medium)
+        generator.impactOccurred()
+    }
 }
 
 #Preview {
     ResultView()
         .environmentObject(DeviceManager(devices: [
-            .init(id: UUID(), name: nil, rssi: 10),
-            .init(id: UUID(), name: nil, rssi: 10),
-            .init(id: UUID(), name: nil, rssi: 10),
-            .init(id: UUID(), name: nil, rssi: 10),
-            .init(id: UUID(), name: nil, rssi: 10),
-            .init(id: UUID(), name: nil, rssi: 10),
-            .init(id: UUID(), name: nil, rssi: 10),
-            .init(id: UUID(), name: nil, rssi: 10),
-            .init(id: UUID(), name: nil, rssi: 10),
-            .init(id: UUID(), name: "Some device", rssi: 100)
+//            .init(id: UUID(), name: nil, rssi: 10),
+//            .init(id: UUID(), name: nil, rssi: 10),
+//            .init(id: UUID(), name: nil, rssi: 10),
+//            .init(id: UUID(), name: nil, rssi: 10),
+//            .init(id: UUID(), name: nil, rssi: 10),
+//            .init(id: UUID(), name: nil, rssi: 10),
+//            .init(id: UUID(), name: nil, rssi: 10),
+//            .init(id: UUID(), name: nil, rssi: 10),
+//            .init(id: UUID(), name: nil, rssi: 10),
+//            .init(id: UUID(), name: "Some device", rssi: 100)
         ]))
 }

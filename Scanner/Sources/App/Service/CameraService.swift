@@ -14,6 +14,23 @@ enum FilterType: String, CaseIterable {
     case red, green, blue, blackWhite
 }
 
+enum CameraAuthorizationError: Error, LocalizedError {
+    case accessDenied
+    case restricted
+    case unknown
+    
+    var errorDescription: String? {
+        switch self {
+        case .accessDenied:
+            return "Access to the camera has been denied. Please enable it in Settings."
+        case .restricted:
+            return "Access to the camera is restricted and cannot be enabled."
+        case .unknown:
+            return "An unknown error occurred while checking camera authorization."
+        }
+    }
+}
+
 final class CameraService: NSObject {
     private let captureSession = AVCaptureSession()
     private var videoOutput: AVCaptureVideoDataOutput?
@@ -32,12 +49,6 @@ final class CameraService: NSObject {
             }
         }
     }()
-    
-    override init() {
-        super.init()
-        setupCamera()
-        setFilter(.red)
-    }
     
     private func setupCamera() {
         captureDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back)
@@ -66,26 +77,28 @@ final class CameraService: NSObject {
         }
     }
     
-    private func checkAuthorization() async -> Bool {
+    private func checkAuthorization() async throws {
         switch AVCaptureDevice.authorizationStatus(for: .video) {
         case .authorized:
-            return true
+            return
         case .notDetermined:
-            return await AVCaptureDevice.requestAccess(for: .video)
-        case .denied, .restricted:
-            return false
+            let granted = await AVCaptureDevice.requestAccess(for: .video)
+            if !granted {
+                throw CameraAuthorizationError.accessDenied
+            }
+        case .denied:
+            throw CameraAuthorizationError.accessDenied
+        case .restricted:
+            throw CameraAuthorizationError.restricted
         @unknown default:
-            return false
+            throw CameraAuthorizationError.unknown
         }
     }
     
-    func start() async {
-        let authorized = await checkAuthorization()
-        guard authorized else {
-            print("Camera access was not authorized.")
-            return
-        }
-        
+    func start() async throws {
+        try await checkAuthorization()
+        setupCamera()
+        setFilter(.red)
         if !captureSession.isRunning {
             captureSession.startRunning()
         }

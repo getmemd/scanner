@@ -31,7 +31,6 @@ struct ScannerView: View {
     @EnvironmentObject var tabManager: TabManager
     
     @ObservedObject private var viewModel = ScannerViewModel()
-    @ObservedObject private var bluetoothService = BluetoothService()
     
     @State private var showPaywall = false
     @State private var paywallViewState: PaywallView.ViewState = .info
@@ -43,8 +42,8 @@ struct ScannerView: View {
                     Button(action: {
                         generateHapticFeedback()
                         tabManager.scannerViewState = .wifi
-                        if bluetoothService.isScanning {
-                            bluetoothService.stopScan()
+                        if viewModel.isBluetoothScanning {
+                            viewModel.stopBluetoothScan()
                         }
                     }) {
                         HStack {
@@ -60,8 +59,8 @@ struct ScannerView: View {
                     Button(action: {
                         generateHapticFeedback()
                         tabManager.scannerViewState = .bluetooth
-                        if viewModel.isScanning {
-                            viewModel.stopScan()
+                        if viewModel.isLanScanning {
+                            viewModel.stopLanScan()
                         }
                     }) {
                         HStack {
@@ -78,15 +77,11 @@ struct ScannerView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 16))
                 .padding(.vertical, 40)
                 Spacer()
-                if viewModel.isScanning || bluetoothService.isScanning {
+                if viewModel.isLanScanning || viewModel.isBluetoothScanning  {
                     RadarLoader()
-                }
-                if (tabManager.scannerViewState == .wifi && viewModel.isScanning) || (
-                    tabManager.scannerViewState == .bluetooth && bluetoothService.isScanning
-                ) {
                     Spacer()
                     HStack {
-                        Text("Unknown devices detected: \(tabManager.scannerViewState == .wifi ? viewModel.connectedDevices.count : bluetoothService.discoveredDevices.count)")
+                        Text("Unknown devices detected: \(viewModel.connectedDevices.count)")
                             .font(AppFont.text.font)
                             .foregroundColor(.gray90)
                         Spacer()
@@ -96,7 +91,11 @@ struct ScannerView: View {
                             Text("Your IP: \(viewModel.getIpAddress() ?? "unknown")")
                                 .font(AppFont.smallText.font)
                                 .foregroundColor(.gray70)
-                            ProgressView("Searching", value: viewModel.scanProgress, total: 1.0)
+                            ProgressView(
+                                "Searching",
+                                value: viewModel.scanProgress,
+                                total: Float(viewModel.totalProgress)
+                            )
                                 .font(AppFont.smallText.font)
                                 .foregroundColor(.primaryApp)
                                 .padding(.top)
@@ -104,16 +103,16 @@ struct ScannerView: View {
                     }
                     Spacer()
                 } else {
+                    SplashscreenView()
                     Spacer()
                     Button(action: {
                         generateHapticFeedback()
                         if iapViewModel.isSubscribed {
                             switch tabManager.scannerViewState {
                             case .wifi:
-                                viewModel.reload()
+                                viewModel.startLanScan()
                             case .bluetooth:
-                                bluetoothService.startScan()
-                                navigateToResult()
+                                viewModel.startBluetoothScan()
                             }
                         } else {
                             paywallViewState = .info
@@ -133,26 +132,16 @@ struct ScannerView: View {
             .padding([.bottom, .horizontal], 32)
             .background(Color.forth.ignoresSafeArea())
             .onDisappear {
-                if viewModel.isScanning {
-                    viewModel.stopScan()
+                if viewModel.isLanScanning {
+                    viewModel.stopLanScan()
                 }
-                if bluetoothService.isScanning {
-                    bluetoothService.stopScan()
+                if viewModel.isBluetoothScanning {
+                    viewModel.stopBluetoothScan()
                 }
             }
             .navigationDestination(isPresented: $viewModel.isNavigatingToResults) {
-                switch tabManager.scannerViewState {
-                case .wifi:
-                    ResultView()
-                        .environmentObject(
-                            DeviceManager(devices: viewModel.connectedDevices)
-                        )
-                case .bluetooth:
-                    ResultView()
-                        .environmentObject(
-                            DeviceManager(devices: bluetoothService.discoveredDevices)
-                        )
-                }
+                ResultView()
+                    .environmentObject(DeviceManager(devices: viewModel.connectedDevices))
             }
             .toolbar {
                 ToolbarItem(placement: .navigation) {
@@ -180,13 +169,23 @@ struct ScannerView: View {
             .fullScreenCover(isPresented: $showPaywall, content: {
                 PaywallView(viewState: $paywallViewState, showPaywall: $showPaywall)
             })
+            .alert(isPresented: $viewModel.showAlert) {
+                Alert(
+                    title: Text("Scanner requires permission"),
+                    message: Text("The app requires access to scan for nearby devices."),
+                    primaryButton: .default(Text("Settings")) {
+                        openAppSettings()
+                    },
+                    secondaryButton: .cancel(Text("Cancel"))
+                )
+            }
         }
     }
     
-    private func navigateToResult() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 10) {
-            bluetoothService.checkSecure()
-            viewModel.isNavigatingToResults = true
+    private func openAppSettings() {
+        guard let settingsURL = URL(string: UIApplication.openSettingsURLString) else { return }
+        if UIApplication.shared.canOpenURL(settingsURL) {
+            UIApplication.shared.open(settingsURL)
         }
     }
     

@@ -5,7 +5,6 @@
 //  Created by Adilkhan Medeuyev on 01.11.2024.
 //
 
-import AVFoundation
 import SwiftUI
 
 final class CameraDataModel: ObservableObject {

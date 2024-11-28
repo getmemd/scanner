@@ -6,13 +6,14 @@
 //
 
 import Foundation
+import MMLanScan
 
 enum DeviceType: Codable {
     case bluetooth
     case lan
 }
 
-struct Device: Codable, Identifiable {
+struct Device: Codable, Identifiable, Hashable {
     var id = UUID()
     let date: Date
     var isSecure: Bool = false
@@ -35,13 +36,15 @@ struct Device: Codable, Identifiable {
         isSecure = name != nil
     }
     
-    init(data: [AnyHashable: String]) {
+    init(from device: LanDevice) {
+        id = UUID()
+        name = device.hostname
+        rssi = nil
         date = Date()
         type = .lan
-        ipAddress = data[DEVICE_IP_ADDRESS] ?? "Unknown"
-        name = data[DEVICE_NAME] ?? "Unknown"
-        mac = data[DEVICE_MAC]
-        brand = data[DEVICE_BRAND] ?? "Unknown"
+        ipAddress = device.ipAddress
+        mac = device.macAddress
+        brand = device.brand ?? "Unknown"
         isSecure = mac != nil
     }
 }

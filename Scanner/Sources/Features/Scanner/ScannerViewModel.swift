@@ -5,24 +5,75 @@
 //  Created by Adilkhan Medeuyev on 04.11.2024.
 //
 
-import Foundation
+import MMLanScan
+import CoreBluetooth
 
 final class ScannerViewModel: NSObject, ObservableObject {
     @Published var connectedDevices = [Device]()
     @Published var scanProgress: Float = 0.0
-    @Published var isScanning: Bool = false
+    @Published var totalProgress: Int = 0
+    @Published var isLanScanning: Bool = false
     @Published var isNavigatingToResults = false
-    private lazy var scanner = LanScan(delegate: self)
+    @Published var showAlert = false
     
-    func reload() {
-        isScanning = true
-        connectedDevices.removeAll()
-        scanner?.start()
+    var isBluetoothScanning: Bool {
+        centralManager?.isScanning ?? false
     }
     
-    func stopScan() {
-        isScanning = false
-        scanner?.stop()
+    private var isBluetoothScanRequested: Bool = false
+    
+    private lazy var scanner = LanScanner(delegate: self)
+    private let localNetworkAuthorization = LocalNetworkAuthorization()
+    
+    private var centralManager: CBCentralManager?
+    
+    func startLanScan() {
+        connectedDevices.removeAll()
+        localNetworkAuthorization.requestAuthorization { [weak self] isAuthorized in
+            if isAuthorized {
+                self?.isLanScanning = true
+                self?.scanner.start()
+            } else {
+                self?.showAlert = true
+            }
+        }
+    }
+    
+    func startBluetoothScan() {
+        switch CBCentralManager.authorization {
+        case .notDetermined:
+            break
+        case .allowedAlways:
+            break
+        default:
+            showAlert = true
+            return
+        }
+        if centralManager == nil {
+            centralManager = .init(delegate: self, queue: nil)
+            isBluetoothScanRequested = true
+        }
+        connectedDevices.removeAll()
+    }
+    
+    func performBluetoothScan() {
+        centralManager?.scanForPeripherals(withServices: nil)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 10) {
+            self.checkSecure()
+            self.isNavigatingToResults = true
+        }
+    }
+    
+    func stopLanScan() {
+        isLanScanning = false
+        scanner.stop()
+    }
+    
+    func stopBluetoothScan() {
+        if centralManager?.isScanning == true {
+            centralManager?.stopScan()
+            centralManager = nil
+        }
     }
     
     func getIpAddress() -> String? {
@@ -53,23 +104,73 @@ final class ScannerViewModel: NSObject, ObservableObject {
         freeifaddrs(ifaddr)
         return address
     }
+    
+    func checkSecure() {
+        StorageService.shared.checkSecure(devices: &connectedDevices)
+    }
 }
 
-// MARK: - LANScanDelegate
+// MARK: - LanScannerDelegate
 
-extension ScannerViewModel: LANScanDelegate {
-    func lanScanHasUpdatedProgress(_ counter: Int, address: String!) {
-        scanProgress = Float(counter) / Float(MAX_IP_RANGE)
+extension ScannerViewModel: LanScannerDelegate {
+    func lanScanDidFindNewDevice(_ device: LanDevice) {
+        let newDevice = Device(from: device)
+        if let index = connectedDevices.firstIndex(where: { $0.ipAddress == device.ipAddress }) {
+            connectedDevices[index] = newDevice
+        } else {
+            connectedDevices.append(newDevice)
+        }
+    }
+
+    func lanScanDidFinishScanning(with status: LanScannerStatus) {
+        switch status {
+        case .finished:
+            checkSecure()
+            isLanScanning = false
+            isNavigatingToResults = true
+        case .cancelled:
+            break
+        }
+    }
+
+    func lanScanDidFailedToScan() { }
+    
+    func lanScanDidUpdateProgress(_ progress: Float, overall: Int) {
+        scanProgress = progress
+        totalProgress = overall
+    }
+}
+
+// MARK: - CBCentralManagerDelegate
+
+extension ScannerViewModel: CBCentralManagerDelegate {
+    func centralManagerDidUpdateState(_ central: CBCentralManager) {
+        switch central.state {
+        case .poweredOn:
+            if isBluetoothScanRequested {
+                isBluetoothScanRequested = false
+                performBluetoothScan()
+            }
+        default:
+            break
+        }
     }
     
-    func lanScanDidFindNewDevice(_ device: [AnyHashable : Any]!) {
-        guard let device = device as? [AnyHashable : String] else { return }
-        connectedDevices.append(Device(data: device))
+    func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: (any Error)?) {
+        if let error = error {
+            print("Failed to connect to peripheral: \(error.localizedDescription)")
+        }
+        stopBluetoothScan()
     }
     
-    func lanScanDidFinishScanning() {
-        StorageService.shared.checkSecure(devices: &connectedDevices)
-        isScanning = false
-        isNavigatingToResults = true
+    func centralManager(_ central: CBCentralManager,
+                        didDiscover peripheral: CBPeripheral,
+                        advertisementData: [String: Any],
+                        rssi RSSI: NSNumber) {
+        if let index = connectedDevices.firstIndex(where: { $0.id == peripheral.identifier }) {
+            connectedDevices[index].rssi = RSSI.intValue
+        } else {
+            connectedDevices.append(Device(id: peripheral.identifier, name: peripheral.name, rssi: RSSI.intValue))
+        }
     }
 }

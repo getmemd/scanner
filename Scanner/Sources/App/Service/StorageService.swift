@@ -61,7 +61,7 @@ final class StorageService {
         updatedHistory = updatedHistory.removingDuplicates {
             $0.id == $1.id && Calendar.current.isDate($0.date, inSameDayAs: $1.date)
         }
-        StorageService.shared.setHistory(data: updatedHistory)
+        setHistory(data: updatedHistory)
     }
     
     private func saveData<T: Codable>(_ data: [T], forKey key: String) {

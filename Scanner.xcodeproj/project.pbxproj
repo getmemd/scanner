@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		C5127EBF2CE98F7D00BB8C8A /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = C5127EBE2CE98F7D00BB8C8A /* RevenueCat */; };
+		C5A947822CF7C70F0055977F /* MMLanScan in Frameworks */ = {isa = PBXBuildFile; productRef = C5A947812CF7C70F0055977F /* MMLanScan */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -41,6 +42,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C5127EBF2CE98F7D00BB8C8A /* RevenueCat in Frameworks */,
+				C5A947822CF7C70F0055977F /* MMLanScan in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -121,6 +123,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				C5127EAB2CE6E92500BB8C8A /* XCRemoteSwiftPackageReference "purchases-ios-spm" */,
+				C5A947802CF7C70F0055977F /* XCLocalSwiftPackageReference "../MMLanScan" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = C5ED59292CD4195C009CDF27 /* Products */;
@@ -282,11 +285,12 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Scanner/Resources/Preview Content\"";
-				DEVELOPMENT_TEAM = 239DJH6J58;
+				DEVELOPMENT_TEAM = 9RSGP9843T;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Scanner/Info.plist;
 				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "The app requires Bluetooth access to scan for nearby devices.";
+				INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription = "The app requires Bluetooth access to scan for nearby devices.";
 				INFOPLIST_KEY_NSCameraUsageDescription = "This app needs permission to access the camera";
 				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "To detect devices on your network, the app requires Local Network access.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -308,7 +312,6 @@
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "Scanner/Sources/App/Utility/Scanner/Scanner-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -330,6 +333,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Scanner/Info.plist;
 				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "The app requires Bluetooth access to scan for nearby devices.";
+				INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription = "The app requires Bluetooth access to scan for nearby devices.";
 				INFOPLIST_KEY_NSCameraUsageDescription = "This app needs permission to access the camera";
 				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "To detect devices on your network, the app requires Local Network access.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -351,7 +355,6 @@
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "Scanner/Sources/App/Utility/Scanner/Scanner-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
@@ -380,6 +383,13 @@
 		};
 /* End XCConfigurationList section */
 
+/* Begin XCLocalSwiftPackageReference section */
+		C5A947802CF7C70F0055977F /* XCLocalSwiftPackageReference "../MMLanScan" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../MMLanScan;
+		};
+/* End XCLocalSwiftPackageReference section */
+
 /* Begin XCRemoteSwiftPackageReference section */
 		C5127EAB2CE6E92500BB8C8A /* XCRemoteSwiftPackageReference "purchases-ios-spm" */ = {
 			isa = XCRemoteSwiftPackageReference;
@@ -396,6 +406,10 @@
 			isa = XCSwiftPackageProductDependency;
 			package = C5127EAB2CE6E92500BB8C8A /* XCRemoteSwiftPackageReference "purchases-ios-spm" */;
 			productName = RevenueCat;
+		};
+		C5A947812CF7C70F0055977F /* MMLanScan */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = MMLanScan;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

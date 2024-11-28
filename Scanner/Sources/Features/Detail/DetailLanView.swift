@@ -10,6 +10,7 @@ import SwiftUI
 struct DetailLanView: View {
     @Environment(\.presentationMode) var presentationMode
     @EnvironmentObject var deviceManager: DeviceManager
+    @EnvironmentObject var tabManager: TabManager
     
     @State var lanDevice: Device
     
@@ -69,6 +70,7 @@ struct DetailLanView: View {
             Spacer()
             Button(action: {
                 generateHapticFeedback()
+                tabManager.selectedTab = 1
             }) {
                 Text("SEARCH")
                     .font(AppFont.button.font)
@@ -138,14 +140,4 @@ struct DetailLanView: View {
         let generator = UIImpactFeedbackGenerator(style: .medium)
         generator.impactOccurred()
     }
-}
-
-#Preview {
-    DetailLanView(lanDevice: .init(data: [
-        DEVICE_IP_ADDRESS : "192.168.1.1",
-        DEVICE_NAME : "Lan Device",
-        DEVICE_MAC : "00:1b:63:84:45:e6",
-        DEVICE_BRAND : "APPLE"
-    ]))
-        .environmentObject(DeviceManager())
 }
