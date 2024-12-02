@@ -24,6 +24,8 @@ struct PaywallSubscriptionCardView: View {
             Text(iapViewModel.localizedPrices[plan] ?? "Error")
                 .font(AppFont.h5.font)
                 .foregroundStyle(isSelected ? .gray0 : .gray80)
+                .lineLimit(1)
+                .minimumScaleFactor(0.1)
             Text(plan.description)
                 .font(AppFont.smallText.font)
                 .foregroundStyle(isSelected ? .gray40 : .gray70)

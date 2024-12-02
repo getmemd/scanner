@@ -9,6 +9,7 @@ import SwiftUI
 
 struct MainView: View {
     @State private var showPaywall = false
+    @State private var paywallViewState: PaywallView.ViewState = .info
     @StateObject private var tabManager = TabManager()
     @StateObject private var iapViewModel = IAPViewModel()
     
@@ -46,7 +47,7 @@ struct MainView: View {
                 .tag(4)
         }
         .fullScreenCover(isPresented: $showPaywall, content: {
-            PaywallView(viewState: .constant(.info), showPaywall: $showPaywall)
+            PaywallView(viewState: $paywallViewState, showPaywall: $showPaywall)
         })
         .environmentObject(tabManager)
         .environmentObject(iapViewModel)

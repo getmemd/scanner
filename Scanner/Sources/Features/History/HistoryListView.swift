@@ -35,12 +35,17 @@ struct HistoryListView: View {
             .refreshable {
                 viewModel.loadHistory()
             }
+            .onAppear {
+                viewModel.loadHistory()
+            }
             .navigationDestination(for: Device.self) { device in
                 switch device.type {
                 case .lan:
                     DetailLanView(lanDevice: device)
+                        .environmentObject(DeviceManager(devices: viewModel.devices))
                 case .bluetooth:
                     DetailBluetoothView(bleDevice: device)
+                        .environmentObject(DeviceManager(devices: viewModel.devices))
                 }
             }
         }

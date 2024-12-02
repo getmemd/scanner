@@ -95,6 +95,7 @@ struct InfoView: View {
                     .foregroundStyle(.primaryApp)
             }
         }
+        .toolbar(.hidden, for: .tabBar)
         .navigationBarBackButtonHidden(true)
     }
 }

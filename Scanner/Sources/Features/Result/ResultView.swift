@@ -13,10 +13,11 @@ struct ResultView: View {
     
     var body: some View {
         NavigationStack {
-            if !deviceManager.devices.isEmpty {
+            if deviceManager.devices.isEmpty {
                 VStack {
                     Spacer()
-                    SplashscreenView()
+                    Image(.splashscreen)
+                        .opacity(0.5)
                     Spacer()
                     VStack(spacing: 0) {
                         Text("No devices detected")

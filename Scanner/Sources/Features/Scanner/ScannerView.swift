@@ -77,8 +77,8 @@ struct ScannerView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 16))
                 .padding(.vertical, 40)
                 Spacer()
+                RadarLoader(progress: $viewModel.scanProgress)
                 if viewModel.isLanScanning || viewModel.isBluetoothScanning  {
-                    RadarLoader()
                     Spacer()
                     HStack {
                         Text("Unknown devices detected: \(viewModel.connectedDevices.count)")
@@ -91,19 +91,10 @@ struct ScannerView: View {
                             Text("Your IP: \(viewModel.getIpAddress() ?? "unknown")")
                                 .font(AppFont.smallText.font)
                                 .foregroundColor(.gray70)
-                            ProgressView(
-                                "Searching",
-                                value: viewModel.scanProgress,
-                                total: Float(viewModel.totalProgress)
-                            )
-                                .font(AppFont.smallText.font)
-                                .foregroundColor(.primaryApp)
-                                .padding(.top)
                         }
                     }
                     Spacer()
                 } else {
-                    SplashscreenView()
                     Spacer()
                     Button(action: {
                         generateHapticFeedback()

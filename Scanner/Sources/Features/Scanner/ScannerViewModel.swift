@@ -10,8 +10,7 @@ import CoreBluetooth
 
 final class ScannerViewModel: NSObject, ObservableObject {
     @Published var connectedDevices = [Device]()
-    @Published var scanProgress: Float = 0.0
-    @Published var totalProgress: Int = 0
+    @Published var scanProgress: Double = 0.0
     @Published var isLanScanning: Bool = false
     @Published var isNavigatingToResults = false
     @Published var showAlert = false
@@ -29,6 +28,7 @@ final class ScannerViewModel: NSObject, ObservableObject {
     
     func startLanScan() {
         connectedDevices.removeAll()
+        scanProgress = 0
         localNetworkAuthorization.requestAuthorization { [weak self] isAuthorized in
             if isAuthorized {
                 self?.isLanScanning = true
@@ -52,15 +52,31 @@ final class ScannerViewModel: NSObject, ObservableObject {
         if centralManager == nil {
             centralManager = .init(delegate: self, queue: nil)
             isBluetoothScanRequested = true
+        } else {
+            performBluetoothScan()
         }
         connectedDevices.removeAll()
     }
     
     func performBluetoothScan() {
+        scanProgress = 0.0
         centralManager?.scanForPeripherals(withServices: nil)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 10) {
-            self.checkSecure()
-            self.isNavigatingToResults = true
+        let scanDuration: TimeInterval = 10.0
+        let progressUpdateInterval: TimeInterval = 0.1
+        var elapsedTime: TimeInterval = 0.0
+        Timer.scheduledTimer(withTimeInterval: progressUpdateInterval, repeats: true) { [weak self] timer in
+            guard let self = self else {
+                timer.invalidate()
+                return
+            }
+            elapsedTime += progressUpdateInterval
+            self.scanProgress = min(elapsedTime / scanDuration, 1.0)
+            if elapsedTime >= scanDuration {
+                timer.invalidate()
+                self.centralManager?.stopScan()
+                self.checkSecure()
+                self.isNavigatingToResults = true
+            }
         }
     }
     
@@ -70,10 +86,8 @@ final class ScannerViewModel: NSObject, ObservableObject {
     }
     
     func stopBluetoothScan() {
-        if centralManager?.isScanning == true {
-            centralManager?.stopScan()
-            centralManager = nil
-        }
+        centralManager?.stopScan()
+        centralManager = nil
     }
     
     func getIpAddress() -> String? {
@@ -136,8 +150,7 @@ extension ScannerViewModel: LanScannerDelegate {
     func lanScanDidFailedToScan() { }
     
     func lanScanDidUpdateProgress(_ progress: Float, overall: Int) {
-        scanProgress = progress
-        totalProgress = overall
+        scanProgress = Double(progress) / Double(overall)
     }
 }
 

@@ -10,6 +10,7 @@ import SwiftUI
 struct OnboardingView: View {
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding: Bool = false
 
+    @Environment(\.requestReview) var requestReview
     @State private var currentPage = 0
     private let pages: [OnboardingPageViewModel] = [
         .init(
@@ -47,6 +48,7 @@ struct OnboardingView: View {
                         if currentPage < pages.count - 1 {
                             currentPage += 1
                         } else {
+                            requestReview()
                             hasSeenOnboarding = true
                         }
                     }

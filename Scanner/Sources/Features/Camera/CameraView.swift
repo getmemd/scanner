@@ -30,7 +30,7 @@ struct CameraView: View {
                             .border(Color.black, width: 1)
                             .cornerRadius(16)
                     } else {
-                        RadarLoader()
+                        RadarLoader(progress: .constant(1))
                             .frame(width: geometry.size.width, height: geometry.size.height)
                     }
                 }

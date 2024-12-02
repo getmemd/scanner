@@ -8,34 +8,33 @@
 import SwiftUI
 
 struct RadarLoader: View {
-    @State private var rotation: Double = 0
+    @Binding var progress: Double
+    
+    private let circleSizes: [CGFloat] = [300, 200, 100]
     
     var body: some View {
         ZStack {
-            ForEach([300, 200, 100], id: \.self) { size in
-                Circle()
-                    .stroke(Color.third, lineWidth: 6)
-                    .frame(width: CGFloat(size), height: CGFloat(size))
-            }
-            ForEach([(300, 0.25, 0.5), (200, 0.0, 0.5), (100, 0.0, 0.5)], id: \.0) { size, start, end in
-                Circle()
-                    .trim(from: start, to: end)
-                    .stroke(Color.primaryApp, lineWidth: 6)
-                    .frame(width: CGFloat(size), height: CGFloat(size))
-            }
-            .rotationEffect(.degrees(rotation))
-        }
-        .onAppear {
-            withAnimation(
-                Animation.linear(duration: 2)
-                    .repeatForever(autoreverses: false)
-            ) {
-                rotation = 360
+            ForEach(circleSizes, id: \.self) { size in
+                ZStack {
+                    Circle()
+                        .stroke(.third, lineWidth: 6)
+                    Circle()
+                        .trim(from: 0, to: calculateProgress(size: size))
+                        .stroke(style: StrokeStyle(lineWidth: 6, lineCap: .round))
+                        .fill(.primaryApp)
+                        .animation(.smooth(duration: 1), value: progress)
+                }
+                .rotationEffect(.degrees(-90))
+                .frame(width: size, height: size)
             }
         }
+    }
+    
+    private func calculateProgress(size: CGFloat) -> Double {
+        return progress / size * 100 * 3
     }
 }
 
 #Preview {
-    RadarLoader()
+    RadarLoader(progress: .constant(0.9))
 }

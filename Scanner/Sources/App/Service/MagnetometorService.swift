@@ -41,6 +41,7 @@ final class MagnetometorService: ObservableObject {
     }
     
     private func calculateMagneticStrength() {
-        magneticStrength = sqrt(pow(magneticField.x, 2) + pow(magneticField.y, 2) + pow(magneticField.z, 2))
+        let strength = sqrt(pow(magneticField.x, 2) + pow(magneticField.y, 2) + pow(magneticField.z, 2))
+        magneticStrength = strength > 300 ? 300 : strength
     }
 }

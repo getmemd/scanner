@@ -30,9 +30,6 @@ struct HistoryView: View {
             }
         }
         .background(Color.forth.ignoresSafeArea())
-        .onAppear {
-            viewModel.loadHistory()
-        }
     }
 }
 
