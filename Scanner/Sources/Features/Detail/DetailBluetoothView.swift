@@ -53,7 +53,8 @@ struct DetailBluetoothView: View {
             Spacer()
             Button(action: {
                 generateHapticFeedback()
-                tabManager.selectedTab = 1
+                tabManager.scannerViewState = .bluetooth
+                tabManager.selectedTab = 2
             }) {
                 Text("SEARCH")
                     .font(AppFont.button.font)
@@ -111,7 +112,7 @@ struct DetailBluetoothView: View {
             }
         }
         .toolbar(.hidden, for: .tabBar)
-        .onAppear {
+        .task {
             calculateProximityPercentage()
         }
     }

@@ -14,6 +14,7 @@ struct CameraView: View {
     @State private var selectedFilter = FilterType.red
     @State private var paywallViewState: PaywallView.ViewState = .info
     @State private var showPaywall = false
+    @State private var showSettings = false
     @State private var showAlert = false
     @State private var alertMessage = ""
     
@@ -30,7 +31,7 @@ struct CameraView: View {
                             .border(Color.black, width: 1)
                             .cornerRadius(16)
                     } else {
-                        RadarLoader(progress: .constant(1))
+                        Image(.splashscreen)
                             .frame(width: geometry.size.width, height: geometry.size.height)
                     }
                 }
@@ -47,7 +48,6 @@ struct CameraView: View {
                                     showAlertWith(message: error.localizedDescription)
                                 }
                             }
-                            
                         } else {
                             paywallViewState = .info
                             showPaywall = true
@@ -61,30 +61,31 @@ struct CameraView: View {
                             .background(.primaryApp)
                             .cornerRadius(12)
                     }
-                    .padding(.horizontal, 16)
-                }
-                HStack(spacing: 32) {
-                    ForEach(FilterType.allCases, id: \.self) { filter in
-                        Button(action: {
-                            generateHapticFeedback()
-                            model.camera.setFilter(filter)
-                            selectedFilter = filter
-                        }) {
-                            switch filter {
-                            case .red:
-                                Image(selectedFilter == filter ? .redSelected : .red)
-                            case .green:
-                                Image(selectedFilter == filter ? .greenSelected : .green)
-                            case .blue:
-                                Image(selectedFilter == filter ? .blueSelected : .blue)
-                            case .blackWhite:
-                                Image(selectedFilter == filter ? .bwSelected : .bw)
+                    .padding([.horizontal, .bottom], 32)
+                } else {
+                    HStack(spacing: 32) {
+                        ForEach(FilterType.allCases, id: \.self) { filter in
+                            Button(action: {
+                                generateHapticFeedback()
+                                model.camera.setFilter(filter)
+                                selectedFilter = filter
+                            }) {
+                                switch filter {
+                                case .red:
+                                    Image(selectedFilter == filter ? .redSelected : .red)
+                                case .green:
+                                    Image(selectedFilter == filter ? .greenSelected : .green)
+                                case .blue:
+                                    Image(selectedFilter == filter ? .blueSelected : .blue)
+                                case .blackWhite:
+                                    Image(selectedFilter == filter ? .bwSelected : .bw)
+                                }
                             }
+                            .buttonStyle(PlainButtonStyle())
                         }
-                        .buttonStyle(PlainButtonStyle())
                     }
+                    .padding()
                 }
-                .padding()
             }
             .background(Color.forth.ignoresSafeArea())
             .toolbar {
@@ -104,6 +105,14 @@ struct CameraView: View {
                         }
                     }
                 }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(action: {
+                        showSettings = true
+                    }) {
+                        Image(.settings)
+                            .foregroundStyle(.gray70)
+                    }
+                }
             }
             .onDisappear {
                 model.camera.stop()
@@ -117,14 +126,16 @@ struct CameraView: View {
             .fullScreenCover(isPresented: $showPaywall, content: {
                 PaywallView(viewState: $paywallViewState, showPaywall: $showPaywall)
             })
-            .alert(isPresented: $showAlert) {
-                Alert(
-                    title: Text("Camera Access Required"),
-                    message: Text(alertMessage),
-                    primaryButton: .default(Text("Settings")) {
-                        openAppSettings()
-                    },
-                    secondaryButton: .cancel(Text("Cancel"))
+            .fullScreenCover(isPresented: $showSettings, content: {
+                SettingsView()
+            })
+            .overlay {
+                CustomAlertView(
+                    isPresented: $showAlert,
+                    title: "Camera Access Required",
+                    message: alertMessage,
+                    primaryButtonText: "Settings",
+                    primaryAction: { openAppSettings() }
                 )
             }
         }

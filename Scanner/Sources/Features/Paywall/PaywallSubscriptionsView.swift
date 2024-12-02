@@ -48,7 +48,7 @@ struct PaywallSubscriptionsView: View {
                 }
                 Spacer()
                 Toggle(isOn: $isOn) {
-                    Text("Free Trial Disabled")
+                    Text("Free Trial \(isOn ? "Enabled" : "Disabled")")
                         .font(AppFont.text.font)
                         .foregroundStyle(.gray80)
                 }

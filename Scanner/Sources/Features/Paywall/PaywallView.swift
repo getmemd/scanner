@@ -49,9 +49,7 @@ struct PaywallView: View {
                     Button {
                         generateHapticFeedback()
                         if viewState == .info {
-                            withAnimation {
-                                viewState = .subscriptions
-                            }
+                            viewModel.purchaseProduct(productType: .featureWeeklyTrial)
                         } else {
                             viewModel.purchaseProduct(productType: selectedPlan)
                         }

@@ -20,12 +20,10 @@ final class StorageService {
         userDefaults.removeObject(forKey: Keys.historyForDevices)
     }
     
-    func removeHistoryItem(id: UUID) {
+    func removeHistoryItem(device: Device) {
         var devices = getHistory()
-        for (index, device) in devices.enumerated() {
-            if device.id == id {
-                devices.remove(at: index)
-            }
+        if let index = devices.firstIndex(of: device) {
+            devices.remove(at: index)
         }
         setHistory(data: devices)
     }
@@ -59,7 +57,12 @@ final class StorageService {
         }
         var updatedHistory = history + devices
         updatedHistory = updatedHistory.removingDuplicates {
-            $0.id == $1.id && Calendar.current.isDate($0.date, inSameDayAs: $1.date)
+            switch $0.type {
+            case .bluetooth:
+                $0.id == $1.id && Calendar.current.isDate($0.date, inSameDayAs: $1.date)
+            case .lan:
+                $0.ipAddress == $1.ipAddress && Calendar.current.isDate($0.date, inSameDayAs: $1.date)
+            }
         }
         setHistory(data: updatedHistory)
     }

@@ -32,6 +32,7 @@ struct ScannerView: View {
     
     @ObservedObject private var viewModel = ScannerViewModel()
     
+    @State private var showSettings = false
     @State private var showPaywall = false
     @State private var paywallViewState: PaywallView.ViewState = .info
     
@@ -151,6 +152,14 @@ struct ScannerView: View {
                         }
                     }
                 }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(action: {
+                        showSettings = true
+                    }) {
+                        Image(.settings)
+                            .foregroundStyle(.gray70)
+                    }
+                }
             }
             .onChange(of: iapViewModel.subscriptionEndDate) { newValue in
                 if newValue > Date.now.timeIntervalSinceReferenceDate {
@@ -160,14 +169,16 @@ struct ScannerView: View {
             .fullScreenCover(isPresented: $showPaywall, content: {
                 PaywallView(viewState: $paywallViewState, showPaywall: $showPaywall)
             })
-            .alert(isPresented: $viewModel.showAlert) {
-                Alert(
-                    title: Text("Scanner requires permission"),
-                    message: Text("The app requires access to scan for nearby devices."),
-                    primaryButton: .default(Text("Settings")) {
-                        openAppSettings()
-                    },
-                    secondaryButton: .cancel(Text("Cancel"))
+            .fullScreenCover(isPresented: $showSettings, content: {
+                SettingsView()
+            })
+            .overlay {
+                CustomAlertView(
+                    isPresented: $viewModel.showAlert,
+                    title: "Scanner requires permission",
+                    message: "The app requires access to scan for nearby devices.",
+                    primaryButtonText: "Settings",
+                    primaryAction: { openAppSettings() }
                 )
             }
         }

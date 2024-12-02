@@ -40,6 +40,7 @@ struct SettingsView: View {
         }
     }
     
+    @Environment(\.presentationMode) var presentationMode
     @Environment(\.requestReview) var requestReview
     @Environment(\.openURL) var openURL
     @EnvironmentObject var iapViewModel: IAPViewModel
@@ -49,9 +50,19 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack(path: $path) {
             VStack(spacing: 0) {
-                Text("Settings")
-                    .font(AppFont.h4.font)
-                    .foregroundStyle(.primaryApp)
+                HStack {
+                    Text("Settings")
+                        .font(AppFont.h4.font)
+                        .foregroundStyle(.primaryApp)
+                    Spacer()
+                    Button {
+                        presentationMode.wrappedValue.dismiss()
+                    } label: {
+                        Image(.closeSquare)
+                            .foregroundStyle(.gray80)
+                    }
+                }
+                .padding(.horizontal)
                 List {
                     ForEach(OptionType.allCases, id: \.self) { option in
                         Button(action: {

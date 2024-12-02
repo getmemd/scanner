@@ -10,13 +10,10 @@ import SwiftUI
 struct MagnetView: View {
     @EnvironmentObject var iapViewModel: IAPViewModel
     
+    @State private var showSettings = false
     @State private var showPaywall = false
     @State private var paywallViewState: PaywallView.ViewState = .info
-    @State private var isScanning: Bool = false {
-        didSet {
-            isScanning ? magnetometorService.start() : magnetometorService.stop()
-        }
-    }
+    @State private var isScanning: Bool = false
     
     @StateObject private var magnetometorService = MagnetometorService()
     
@@ -65,6 +62,11 @@ struct MagnetView: View {
                     generateHapticFeedback()
                     if iapViewModel.isSubscribed {
                         isScanning.toggle()
+                        if isScanning {
+                            magnetometorService.start()
+                        } else {
+                            magnetometorService.stop()
+                        }
                     } else {
                         paywallViewState = .info
                         showPaywall = true
@@ -98,6 +100,14 @@ struct MagnetView: View {
                         }
                     }
                 }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(action: {
+                        showSettings = true
+                    }) {
+                        Image(.settings)
+                            .foregroundStyle(.gray70)
+                    }
+                }
             }
             .onDisappear {
                 if isScanning {
@@ -112,6 +122,9 @@ struct MagnetView: View {
             }
             .fullScreenCover(isPresented: $showPaywall, content: {
                 PaywallView(viewState: $paywallViewState, showPaywall: $showPaywall)
+            })
+            .fullScreenCover(isPresented: $showSettings, content: {
+                SettingsView()
             })
         }
     }

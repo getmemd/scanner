@@ -147,7 +147,9 @@ extension ScannerViewModel: LanScannerDelegate {
         }
     }
 
-    func lanScanDidFailedToScan() { }
+    func lanScanDidFailedToScan() {
+        showAlert = true
+    }
     
     func lanScanDidUpdateProgress(_ progress: Float, overall: Int) {
         scanProgress = Double(progress) / Double(overall)
@@ -165,7 +167,10 @@ extension ScannerViewModel: CBCentralManagerDelegate {
                 performBluetoothScan()
             }
         default:
-            break
+            if isBluetoothScanning {
+                showAlert = true
+                centralManager?.stopScan()
+            }
         }
     }
     
@@ -173,6 +178,7 @@ extension ScannerViewModel: CBCentralManagerDelegate {
         if let error = error {
             print("Failed to connect to peripheral: \(error.localizedDescription)")
         }
+        showAlert = true
         stopBluetoothScan()
     }
     

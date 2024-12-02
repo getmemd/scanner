@@ -19,10 +19,10 @@ struct PaywallInfoView: View {
                 Image(.shield)
                 Spacer()
                 VStack(alignment: .leading) {
-                    Text("Unlock the full potential with our premium version!")
+                    Text("Unlock the full potential\nwith our premium version!")
                         .font(AppFont.h4.font)
                     VStack {
-                        Text("Unlock the full app experience with a risk-free 3-day free trial, followed by \(iapViewModel.localizedPrices[.featureWeeklyTrial] ?? "Error") per week, ") + Text(
+                        Text("Unlock the full app experience with a risk-\nfree 3-day free trial, followed by \(iapViewModel.localizedPrices[.featureWeeklyTrial] ?? "Error") per\nweek, ") + Text(
                             "or continue using the limited version."
                         )
                         .underline()

@@ -39,12 +39,6 @@ struct MainView: View {
                     Text("Detector")
                 }
                 .tag(3)
-            SettingsView()
-                .tabItem {
-                    Image(.settings)
-                    Text("Settings")
-                }
-                .tag(4)
         }
         .fullScreenCover(isPresented: $showPaywall, content: {
             PaywallView(viewState: $paywallViewState, showPaywall: $showPaywall)
@@ -58,10 +52,8 @@ struct MainView: View {
         }
         .onAppear {
             withAnimation {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                    if !iapViewModel.isSubscribed {
-                        showPaywall = true
-                    }
+                if !iapViewModel.isSubscribed {
+                    showPaywall = true
                 }
             }
         }

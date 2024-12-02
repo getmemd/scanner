@@ -70,7 +70,8 @@ struct DetailLanView: View {
             Spacer()
             Button(action: {
                 generateHapticFeedback()
-                tabManager.selectedTab = 1
+                tabManager.scannerViewState = .wifi
+                tabManager.selectedTab = 2
             }) {
                 Text("SEARCH")
                     .font(AppFont.button.font)

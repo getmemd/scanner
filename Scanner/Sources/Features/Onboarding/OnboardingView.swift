@@ -14,28 +14,28 @@ struct OnboardingView: View {
     @State private var currentPage = 0
     private let pages: [OnboardingPageViewModel] = [
         .init(
-            title: "Ensure that your network connection is secure.",
-            description: "This is the ideal moment to identify and thoroughly assess any potential risks to ensure your digital security remains intact.",
+            title: "Ensure that your network\nconnection is secure.",
+            description: "This is the ideal moment to identify and\nthoroughly assess any potential risks to\nensure your digital security remains intact.",
             image: .onboarding1
         ),
         .init(
-            title: "Scan devices using Bluetooth and Wi-Fi connections.",
-            description: "Locate nearby Bluetooth devices and identify devices that are currently connected to your Wi-Fi network or a shared Wi-Fi network.",
+            title: "Scan devices using Bluetooth\nand Wi-Fi connections.",
+            description: "Locate nearby Bluetooth devices and identify\ndevices that are currently connected to your\nWi-Fi network or a shared Wi-Fi network.",
             image: .onboarding2
         ),
         .init(
-            title: "Protect your personal privacy from unwanted surveillance.",
-            description: "Our application provides a comprehensive set of tools to effectively ensure your privacy and protect your personal information.",
+            title: "Protect your personal privacy\nfrom unwanted surveillance.",
+            description: "Our application provides a comprehensive set\nof tools to effectively ensure your privacy\nand protect your personal information.",
             image: .onboarding3
         ),
         .init(
-            title: "Convenient and accurate identification with filters.",
-            description: "You can track lost items and pinpoint their exact distance from your current location. You'll never lose important things again.",
+            title: "Convenient and accurate\nidentification with filters.",
+            description: "You can track lost items and pinpoint their\nexact distance from your current location.\nYou'll never lose important things again.",
             image: .onboarding4
         ),
         .init(
-            title: "Detection system that is based on your camera.",
-            description: "Use your camera to thoroughly scan and analyze your environment, detecting other unwanted devices within the area.",
+            title: "Detection system that is\nbased on your camera.",
+            description: "Use your camera to thoroughly scan and\nanalyze your environment, detecting other\nunwanted devices within the area.",
             image: .onboarding5
         )
     ]

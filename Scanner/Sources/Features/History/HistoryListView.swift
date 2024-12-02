@@ -25,9 +25,14 @@ struct HistoryListView: View {
                                 HistoryDeviceView(device: device)
                                     .padding(4)
                             }
-                        }
-                        .onDelete { indexSet in
-                            viewModel.deleteItems(in: dateKey, at: indexSet)
+                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                Button(role: .destructive) {
+                                    viewModel.deleteItem(device: device)
+                                } label: {
+                                    Image(.trashBin)
+                                }
+                                .tint(.error)
+                            }
                         }
                     }
                 }
@@ -35,7 +40,7 @@ struct HistoryListView: View {
             .refreshable {
                 viewModel.loadHistory()
             }
-            .onAppear {
+            .task {
                 viewModel.loadHistory()
             }
             .navigationDestination(for: Device.self) { device in
@@ -49,35 +54,6 @@ struct HistoryListView: View {
                 }
             }
         }
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button(action: {
-                    generateHapticFeedback()
-                    viewModel.showAlert = true
-                }) {
-                    Image(.trashBin)
-                        .foregroundStyle(.gray80)
-                }
-            }
-            ToolbarItem(placement: .navigationBarTrailing) {
-                EditButton()
-            }
-        }
-        .alert("Do you want to delete the history?", isPresented: $viewModel.showAlert) {
-            Button("Delete History", role: .destructive) {
-                viewModel.clearHistory()
-            }
-            Button("Cancel", role: .cancel) { }
-        } message: {
-            Text("It can't be recovered once deleted.")
-        }
-    }
-    
-    
-    
-    private func generateHapticFeedback() {
-        let generator = UIImpactFeedbackGenerator(style: .medium)
-        generator.impactOccurred()
     }
 }
 

@@ -23,7 +23,11 @@ final class HistoryViewModel: ObservableObject {
     
     func loadHistory() {
         devices = StorageService.shared.getHistory().sorted {
-            $0.date > $1.date
+            if $0.isSecure != $1.isSecure {
+                return !$0.isSecure && $1.isSecure
+            } else {
+                return $0.date > $1.date
+            }
         }
     }
     
@@ -32,16 +36,10 @@ final class HistoryViewModel: ObservableObject {
         devices = []
     }
     
-    func deleteItems(in dateKey: String, at offsets: IndexSet) {
-        var id: UUID = UUID()
-        if let devicesForDate = groupedDevices[dateKey] {
-            for offset in offsets {
-                if let index = devices.firstIndex(where: { $0.id == devicesForDate[offset].id }) {
-                    devices.remove(at: index)
-                    id = devicesForDate[offset].id
-                }
-            }
+    func deleteItem(device: Device) {
+        if let index = devices.firstIndex(of: device) {
+            devices.remove(at: index)
         }
-        StorageService.shared.removeHistoryItem(id: id)
+        StorageService.shared.removeHistoryItem(device: device)
     }
 }
