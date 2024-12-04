@@ -10,7 +10,9 @@ import RevenueCat
 
 @main
 struct ScannerApp: App {
-    @State private var isSplashActive: Bool = true
+    @State private var isSplashActive = true
+    @State private var showPaywall = false
+    @StateObject private var iapViewModel = IAPViewModel()
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding: Bool = false
     
     init() {
@@ -20,19 +22,27 @@ struct ScannerApp: App {
     
     var body: some Scene {
         WindowGroup {
-            if isSplashActive {
-                SplashscreenView()
-                    .ignoresSafeArea()
-                    .onAppear {
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-                            isSplashActive = false
+            ZStack {
+                if isSplashActive {
+                    SplashscreenView()
+                        .onAppear {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                                isSplashActive = false
+                            }
                         }
-                    }
-            } else if !hasSeenOnboarding {
-                OnboardingView()
-                    .ignoresSafeArea()
-            } else {
-                MainView()
+                } else if !hasSeenOnboarding {
+                    OnboardingView()
+                } else if showPaywall {
+                    PaywallView(viewState: .constant(.info), showPaywall: $showPaywall)
+                } else {
+                    MainView()
+                }
+            }
+            .environmentObject(iapViewModel)
+            .onAppear {
+                if !iapViewModel.isSubscribed && hasSeenOnboarding {
+                    showPaywall = true
+                }
             }
         }
     }

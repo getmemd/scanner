@@ -89,7 +89,6 @@ struct PaywallView: View {
                     .padding(10)
                 }
                 .padding(.horizontal, 32)
-                .background(.forth)
                 if viewModel.isLoadingSubs || viewModel.isPurchasing {
                     Color.black.opacity(0.4)
                         .ignoresSafeArea()

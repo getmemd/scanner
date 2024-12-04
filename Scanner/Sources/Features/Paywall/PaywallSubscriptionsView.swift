@@ -11,6 +11,20 @@ struct PaywallSubscriptionsView: View {
     @Binding var isOn: Bool
     @Binding var selectedPlan: ProductType
     
+    @State private var currentPlanIndex = 1
+
+    var availablePlans: [ProductType] {
+        isOn ? [
+            .featureYearly,
+            .featureMonthly,
+            .featureWeekly
+        ] : [
+            .featureYearlyTrial,
+            .featureMonthlyTrial,
+            .featureWeeklyTrial
+        ]
+    }
+
     var body: some View {
         ZStack {
             Image(.background2)
@@ -26,21 +40,11 @@ struct PaywallSubscriptionsView: View {
                 .padding(.top, 16)
                 Spacer()
                 HStack(spacing: 8) {
-                    ForEach(
-                        isOn ? [
-                            ProductType.featureYearly,
-                            .featureMonthly,
-                            .featureWeekly
-                        ] : [
-                            .featureYearlyTrial,
-                            .featureMonthlyTrial,
-                            .featureWeeklyTrial
-                        ],
-                        id: \.self
-                    ) { plan in
+                    ForEach(availablePlans, id: \.self) { plan in
                         PaywallSubscriptionCardView(plan: plan, isSelected: selectedPlan == plan)
                             .onTapGesture {
                                 withAnimation {
+                                    currentPlanIndex = availablePlans.firstIndex(of: plan) ?? 0
                                     selectedPlan = plan
                                 }
                             }
@@ -54,7 +58,18 @@ struct PaywallSubscriptionsView: View {
                 }
                 .toggleStyle(SwitchToggleStyle(tint: .primaryApp))
                 .padding(.bottom, 32)
+                .onChange(of: isOn) { _ in
+                    updateSelectedPlan()
+                }
             }
+        }
+    }
+    
+    private func updateSelectedPlan() {
+        if currentPlanIndex < availablePlans.count {
+            selectedPlan = availablePlans[currentPlanIndex]
+        } else {
+            selectedPlan = availablePlans.first ?? .featureYearly
         }
     }
 }

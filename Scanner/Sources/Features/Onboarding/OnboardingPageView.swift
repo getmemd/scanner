@@ -18,6 +18,7 @@ struct OnboardingPageView: View {
             Image(viewModel.image)
                 .resizable()
                 .scaledToFit()
+                .ignoresSafeArea()
             VStack(alignment: .leading) {
                 Text(viewModel.title)
                     .font(AppFont.h4.font)
@@ -41,8 +42,9 @@ struct OnboardingPageView: View {
                 }
                 .padding(.bottom)
             }
+            .padding(.vertical)
+            .padding(.horizontal, 32)
         }
-        .padding()
     }
     
     private func generateHapticFeedback() {

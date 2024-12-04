@@ -33,6 +33,7 @@ struct CameraView: View {
                     } else {
                         Image(.splashscreen)
                             .frame(width: geometry.size.width, height: geometry.size.height)
+                            .opacity(0.5)
                     }
                 }
                 .padding()

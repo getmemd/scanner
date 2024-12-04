@@ -57,7 +57,7 @@ struct DetailLanView: View {
                         .font(AppFont.text.font)
                         .foregroundColor(.gray80)
                     Spacer()
-                    Text(lanDevice.brand)
+                    Text(lanDevice.brand.isEmpty ? "Unknown" : lanDevice.brand)
                         .font(AppFont.smallText.font)
                         .foregroundColor(.gray60)
                 }

@@ -58,8 +58,8 @@ struct SplashscreenView: View {
                 .offset(x: 40, y: 50)
                 .rotationEffect(.degrees(-rotationAngle))
                 .animation(Animation.linear(duration: 15).repeatForever(autoreverses: false), value: rotationAngle)
-            
         }
+        .ignoresSafeArea()
         .onAppear {
             startAnimation()
         }

@@ -8,9 +8,8 @@
 import SwiftUI
 
 struct OnboardingView: View {
-    @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding: Bool = false
-
     @Environment(\.requestReview) var requestReview
+    @State private var showPaywall = false
     @State private var currentPage = 0
     private let pages: [OnboardingPageViewModel] = [
         .init(
@@ -45,16 +44,18 @@ struct OnboardingView: View {
             ForEach(Array(pages.enumerated()), id: \.offset) { index, page in
                 OnboardingPageView(viewModel: page) {
                     withAnimation {
-                        if currentPage < pages.count - 1 {
+                        if currentPage < pages.count {
                             currentPage += 1
-                        } else {
+                        }
+                        if currentPage == 2 {
                             requestReview()
-                            hasSeenOnboarding = true
                         }
                     }
                 }
                 .tag(index)
             }
+            PaywallView(viewState: .constant(.info), showPaywall: $showPaywall)
+                .tag(pages.count)
         }
         .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
     }
@@ -62,4 +63,5 @@ struct OnboardingView: View {
 
 #Preview {
     OnboardingView()
+        .environmentObject(IAPViewModel())
 }

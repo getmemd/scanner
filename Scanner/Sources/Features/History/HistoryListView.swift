@@ -29,9 +29,9 @@ struct HistoryListView: View {
                                 Button(role: .destructive) {
                                     viewModel.deleteItem(device: device)
                                 } label: {
-                                    Image(.trashBin)
+                                    Image(.trashBinSquare)
                                 }
-                                .tint(.error)
+                                .tint(.gray0)
                             }
                         }
                     }

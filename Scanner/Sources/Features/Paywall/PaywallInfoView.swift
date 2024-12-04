@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct PaywallInfoView: View {
+    @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding: Bool = false
     @Binding var showPaywall: Bool
     @EnvironmentObject var iapViewModel: IAPViewModel
     
@@ -30,6 +31,7 @@ struct PaywallInfoView: View {
                     }
                     .onTapGesture {
                         showPaywall = false
+                        hasSeenOnboarding = true
                     }
                 }
             }
