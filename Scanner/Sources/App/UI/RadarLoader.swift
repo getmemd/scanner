@@ -9,6 +9,9 @@ import SwiftUI
 
 struct RadarLoader: View {
     @Binding var progress: Double
+    @State private var rotation = 0.0
+    @State private var isAnimating: Bool = true
+    @State private var throttledProgress: Double = 0.0
     
     private let circleSizes: [CGFloat] = [300, 200, 100]
     
@@ -19,22 +22,49 @@ struct RadarLoader: View {
                     Circle()
                         .stroke(.third, lineWidth: 6)
                     Circle()
-                        .trim(from: 0, to: calculateProgress(size: size))
+                        .trim(from: calculateTrimStart(size: size), to: calculateProgress(size: size))
                         .stroke(style: StrokeStyle(lineWidth: 6, lineCap: .round))
                         .fill(.primaryApp)
-                        .animation(.smooth(duration: 1), value: progress)
+                        .animation(.easeInOut(duration: 0.5), value: throttledProgress)
                 }
-                .rotationEffect(.degrees(-90))
+                .rotationEffect(.degrees(rotation))
                 .frame(width: size, height: size)
+            }
+            .rotationEffect(.degrees(-90))
+        }
+        .onAppear {
+            updateRotationAnimation()
+        }
+        .onChange(of: progress) { newValue in
+            throttledProgress = newValue
+            isAnimating = newValue <= 0
+        }
+        .onChange(of: isAnimating) { _ in
+            updateRotationAnimation()
+        }
+    }
+    
+    private func updateRotationAnimation() {
+        if isAnimating {
+            withAnimation(.linear(duration: 5).repeatForever(autoreverses: false)) {
+                rotation = 360
+            }
+        } else {
+            withAnimation(.spring(duration: 1)) {
+                rotation = 0
             }
         }
     }
     
+    private func calculateTrimStart(size: CGFloat) -> Double {
+        size == 300 && isAnimating ? 0.25 : 0
+    }
+    
     private func calculateProgress(size: CGFloat) -> Double {
-        return progress / size * 100 * 3
+        isAnimating ? 0.5 : throttledProgress / size * 100 * 3
     }
 }
 
 #Preview {
-    RadarLoader(progress: .constant(0.9))
+    RadarLoader(progress: .constant(0.0))
 }

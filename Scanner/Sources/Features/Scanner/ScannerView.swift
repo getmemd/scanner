@@ -79,47 +79,49 @@ struct ScannerView: View {
                 .padding(.vertical, 40)
                 Spacer()
                 RadarLoader(progress: $viewModel.scanProgress)
-                if viewModel.isLanScanning || viewModel.isBluetoothScanning  {
-                    Spacer()
-                    HStack {
-                        Text("Unknown devices detected: \(viewModel.connectedDevices.count)")
-                            .font(AppFont.text.font)
-                            .foregroundColor(.gray90)
-                        Spacer()
-                    }
-                    if tabManager.scannerViewState == .wifi {
-                        VStack(alignment: .leading) {
-                            Text("Your IP: \(viewModel.getIpAddress() ?? "unknown")")
-                                .font(AppFont.smallText.font)
-                                .foregroundColor(.gray70)
-                        }
-                    }
-                    Spacer()
-                } else {
-                    Spacer()
-                    Button(action: {
-                        generateHapticFeedback()
-                        if iapViewModel.isSubscribed {
-                            switch tabManager.scannerViewState {
-                            case .wifi:
-                                viewModel.startLanScan()
-                            case .bluetooth:
-                                viewModel.startBluetoothScan()
+                Spacer()
+                ZStack {
+                    if viewModel.isLanScanning || viewModel.isBluetoothScanning {
+                        HStack {
+                            VStack(alignment: .leading) {
+                                Text("Unknown devices detected: \(viewModel.connectedDevices.count)")
+                                    .font(AppFont.text.font)
+                                    .foregroundColor(.gray90)
+                                if tabManager.scannerViewState == .wifi {
+                                    Text("Your IP: \(viewModel.getIpAddress() ?? "unknown")")
+                                        .font(AppFont.smallText.font)
+                                        .foregroundColor(.gray70)
+                                }
                             }
-                        } else {
-                            paywallViewState = .info
-                            showPaywall = true
+                            Spacer()
                         }
-                    }) {
-                        Text(tabManager.scannerViewState.buttonTitle)
-                            .font(AppFont.button.font)
-                            .foregroundColor(.gray10)
-                            .padding()
-                            .frame(maxWidth: .infinity)
-                            .background(.primaryApp)
-                            .cornerRadius(12)
+                        Spacer()
+                    } else {
+                        Button(action: {
+                            generateHapticFeedback()
+                            if iapViewModel.isSubscribed {
+                                switch tabManager.scannerViewState {
+                                case .wifi:
+                                    viewModel.startLanScan()
+                                case .bluetooth:
+                                    viewModel.startBluetoothScan()
+                                }
+                            } else {
+                                paywallViewState = .info
+                                showPaywall = true
+                            }
+                        }) {
+                            Text(tabManager.scannerViewState.buttonTitle)
+                                .font(AppFont.button.font)
+                                .foregroundColor(.gray10)
+                                .padding()
+                                .frame(maxWidth: .infinity)
+                                .background(.primaryApp)
+                                .cornerRadius(12)
+                        }
                     }
                 }
+                .frame(height: 50)
             }
             .padding([.bottom, .horizontal], 32)
             .background(Color.forth.ignoresSafeArea())

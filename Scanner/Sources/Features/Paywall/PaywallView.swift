@@ -14,9 +14,10 @@ struct PaywallView: View {
         case subscriptions
     }
     
-    @State private var isTrialDisabled: Bool = false
-    @State private var selectedPlan: ProductType = .featureMonthlyTrial
-    @State private var isBouncing: Bool = false
+    @State private var isTrialDisabled = false
+    @State private var selectedPlan: ProductType = .featureMonthly
+    @State private var isBouncing = false
+    @State private var isLoading = false
     @Binding var viewState: ViewState
     @Binding var showPaywall: Bool
     @EnvironmentObject var viewModel: IAPViewModel
@@ -44,7 +45,7 @@ struct PaywallView: View {
                     if viewState == .info {
                         PaywallInfoView(showPaywall: $showPaywall)
                     } else if viewState == .subscriptions {
-                        PaywallSubscriptionsView(isOn: $isTrialDisabled, selectedPlan: $selectedPlan)
+                        PaywallSubscriptionsView(isTrial: $isTrialDisabled, selectedPlan: $selectedPlan)
                     }
                     Button {
                         generateHapticFeedback()
@@ -65,8 +66,10 @@ struct PaywallView: View {
                     .disabled(viewModel.isPurchasing || viewModel.isLoadingSubs)
                     HStack {
                         Button {
+                            isLoading = true
                             Task {
                                 await viewModel.restore()
+                                isLoading = false
                             }
                         } label: {
                             Text("Restore")
@@ -86,12 +89,10 @@ struct PaywallView: View {
                                 .foregroundStyle(.gray70)
                         }
                     }
-                    .padding(10)
+                    .padding([.top, .horizontal], 10)
                 }
                 .padding(.horizontal, 32)
-                if viewModel.isLoadingSubs || viewModel.isPurchasing {
-                    Color.black.opacity(0.4)
-                        .ignoresSafeArea()
+                if isLoading || viewModel.isLoadingSubs || viewModel.isPurchasing {
                     RoundedRectangle(cornerRadius: 12)
                         .fill(.forth)
                         .frame(width: 80, height: 80)

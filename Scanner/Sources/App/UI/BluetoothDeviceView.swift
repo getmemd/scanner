@@ -18,6 +18,7 @@ struct BluetoothDeviceView: View {
                 Text(device.name ?? "Unknown device")
                     .font(AppFont.text.font)
                     .foregroundStyle(.gray80)
+                    .multilineTextAlignment(.leading)
                 Text(device.id.uuidString)
                     .font(AppFont.smallText.font)
                     .foregroundStyle(.gray60)

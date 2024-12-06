@@ -17,6 +17,10 @@ final class HistoryViewModel: ObservableObject {
         })
     }
     
+    init(devices: [Device]) {
+        self.devices = devices
+    }
+    
     init() {
         loadHistory()
     }

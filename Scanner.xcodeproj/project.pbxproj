@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		C5127EBF2CE98F7D00BB8C8A /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = C5127EBE2CE98F7D00BB8C8A /* RevenueCat */; };
+		C55903862D023C17000974A4 /* AppsFlyerLib in Frameworks */ = {isa = PBXBuildFile; productRef = C55903852D023C17000974A4 /* AppsFlyerLib */; };
 		C5A947822CF7C70F0055977F /* MMLanScan in Frameworks */ = {isa = PBXBuildFile; productRef = C5A947812CF7C70F0055977F /* MMLanScan */; };
 /* End PBXBuildFile section */
 
@@ -43,6 +44,7 @@
 			files = (
 				C5127EBF2CE98F7D00BB8C8A /* RevenueCat in Frameworks */,
 				C5A947822CF7C70F0055977F /* MMLanScan in Frameworks */,
+				C55903862D023C17000974A4 /* AppsFlyerLib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -124,6 +126,7 @@
 			packageReferences = (
 				C5127EAB2CE6E92500BB8C8A /* XCRemoteSwiftPackageReference "purchases-ios-spm" */,
 				C5A947802CF7C70F0055977F /* XCLocalSwiftPackageReference "../MMLanScan" */,
+				C55903842D023C17000974A4 /* XCRemoteSwiftPackageReference "AppsFlyerFramework" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = C5ED59292CD4195C009CDF27 /* Products */;
@@ -399,6 +402,14 @@
 				minimumVersion = 5.8.0;
 			};
 		};
+		C55903842D023C17000974A4 /* XCRemoteSwiftPackageReference "AppsFlyerFramework" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/AppsFlyerSDK/AppsFlyerFramework";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 6.15.3;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -406,6 +417,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = C5127EAB2CE6E92500BB8C8A /* XCRemoteSwiftPackageReference "purchases-ios-spm" */;
 			productName = RevenueCat;
+		};
+		C55903852D023C17000974A4 /* AppsFlyerLib */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C55903842D023C17000974A4 /* XCRemoteSwiftPackageReference "AppsFlyerFramework" */;
+			productName = AppsFlyerLib;
 		};
 		C5A947812CF7C70F0055977F /* MMLanScan */ = {
 			isa = XCSwiftPackageProductDependency;

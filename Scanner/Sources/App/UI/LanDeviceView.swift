@@ -18,6 +18,7 @@ struct LanDeviceView: View {
                 Text(device.name ?? "Unknown")
                     .font(AppFont.text.font)
                     .foregroundStyle(.gray80)
+                    .multilineTextAlignment(.leading)
                 Text(device.ipAddress)
                     .font(AppFont.smallText.font)
                     .foregroundStyle(.gray60)

@@ -8,20 +8,20 @@
 import SwiftUI
 
 struct PaywallSubscriptionsView: View {
-    @Binding var isOn: Bool
+    @Binding var isTrial: Bool
     @Binding var selectedPlan: ProductType
     
     @State private var currentPlanIndex = 1
 
     var availablePlans: [ProductType] {
-        isOn ? [
-            .featureYearly,
-            .featureMonthly,
-            .featureWeekly
-        ] : [
+        isTrial ? [
             .featureYearlyTrial,
             .featureMonthlyTrial,
             .featureWeeklyTrial
+        ] : [
+            .featureYearly,
+            .featureMonthly,
+            .featureWeekly
         ]
     }
 
@@ -29,7 +29,7 @@ struct PaywallSubscriptionsView: View {
         ZStack {
             Image(.background2)
             VStack(alignment: .leading) {
-                VStack(alignment: .leading) {
+                VStack(alignment: .leading, spacing: 8) {
                     Text("Remove worries about hidden cameras")
                         .font(AppFont.text.font)
                     Text("Test your network connection")
@@ -51,14 +51,14 @@ struct PaywallSubscriptionsView: View {
                     }
                 }
                 Spacer()
-                Toggle(isOn: $isOn) {
-                    Text("Free Trial \(isOn ? "Enabled" : "Disabled")")
+                Toggle(isOn: $isTrial) {
+                    Text("Free Trial \(isTrial ? "Enabled" : "Disabled")")
                         .font(AppFont.text.font)
                         .foregroundStyle(.gray80)
                 }
                 .toggleStyle(SwitchToggleStyle(tint: .primaryApp))
                 .padding(.bottom, 32)
-                .onChange(of: isOn) { _ in
+                .onChange(of: isTrial) { _ in
                     updateSelectedPlan()
                 }
             }
@@ -75,6 +75,6 @@ struct PaywallSubscriptionsView: View {
 }
 
 #Preview {
-    PaywallSubscriptionsView(isOn: .constant(true), selectedPlan: .constant(.featureWeeklyTrial))
+    PaywallSubscriptionsView(isTrial: .constant(true), selectedPlan: .constant(.featureWeeklyTrial))
         .environmentObject(IAPViewModel())
 }

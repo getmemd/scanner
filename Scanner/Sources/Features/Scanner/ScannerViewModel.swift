@@ -7,19 +7,19 @@
 
 import MMLanScan
 import CoreBluetooth
+import Network
 
 final class ScannerViewModel: NSObject, ObservableObject {
     @Published var connectedDevices = [Device]()
     @Published var scanProgress: Double = 0.0
     @Published var isLanScanning: Bool = false
+    @Published var isBluetoothScanning: Bool = false
     @Published var isNavigatingToResults = false
     @Published var showAlert = false
     
-    var isBluetoothScanning: Bool {
-        centralManager?.isScanning ?? false
-    }
-    
     private var isBluetoothScanRequested: Bool = false
+    
+    private var bluetoothTimer: Timer?
     
     private lazy var scanner = LanScanner(delegate: self)
     private let localNetworkAuthorization = LocalNetworkAuthorization()
@@ -27,6 +27,7 @@ final class ScannerViewModel: NSObject, ObservableObject {
     private var centralManager: CBCentralManager?
     
     func startLanScan() {
+        checkConnection()
         connectedDevices.removeAll()
         scanProgress = 0
         localNetworkAuthorization.requestAuthorization { [weak self] isAuthorized in
@@ -35,20 +36,20 @@ final class ScannerViewModel: NSObject, ObservableObject {
                 self?.scanner.start()
             } else {
                 self?.showAlert = true
+                self?.stopLanScan()
             }
         }
     }
     
     func startBluetoothScan() {
         switch CBCentralManager.authorization {
-        case .notDetermined:
-            break
-        case .allowedAlways:
+        case .notDetermined, .allowedAlways:
             break
         default:
             showAlert = true
             return
         }
+        isBluetoothScanning = true
         if centralManager == nil {
             centralManager = .init(delegate: self, queue: nil)
             isBluetoothScanRequested = true
@@ -64,7 +65,8 @@ final class ScannerViewModel: NSObject, ObservableObject {
         let scanDuration: TimeInterval = 10.0
         let progressUpdateInterval: TimeInterval = 0.1
         var elapsedTime: TimeInterval = 0.0
-        Timer.scheduledTimer(withTimeInterval: progressUpdateInterval, repeats: true) { [weak self] timer in
+        
+        bluetoothTimer = Timer.scheduledTimer(withTimeInterval: progressUpdateInterval, repeats: true) { [weak self] timer in
             guard let self = self else {
                 timer.invalidate()
                 return
@@ -73,7 +75,8 @@ final class ScannerViewModel: NSObject, ObservableObject {
             self.scanProgress = min(elapsedTime / scanDuration, 1.0)
             if elapsedTime >= scanDuration {
                 timer.invalidate()
-                self.centralManager?.stopScan()
+                self.bluetoothTimer = nil
+                self.stopBluetoothScan()
                 self.checkSecure()
                 self.isNavigatingToResults = true
             }
@@ -81,11 +84,16 @@ final class ScannerViewModel: NSObject, ObservableObject {
     }
     
     func stopLanScan() {
+        scanProgress = 0
         isLanScanning = false
         scanner.stop()
     }
     
     func stopBluetoothScan() {
+        bluetoothTimer?.invalidate()
+        bluetoothTimer = nil
+        scanProgress = 0
+        isBluetoothScanning = false
         centralManager?.stopScan()
         centralManager = nil
     }
@@ -119,7 +127,25 @@ final class ScannerViewModel: NSObject, ObservableObject {
         return address
     }
     
-    func checkSecure() {
+    private func checkConnection() {
+        let monitor = NWPathMonitor()
+        let queue = DispatchQueue.global(qos: .background)
+        monitor.pathUpdateHandler = { [weak self] path in
+            guard let self = self else { return }
+            if path.status == .satisfied && path.usesInterfaceType(.wifi) {
+                print("Устройство подключено к Wi-Fi.")
+            } else {
+                print("Устройство не подключено к Wi-Fi.")
+                DispatchQueue.main.async {
+                    self.showAlert = true
+                    self.stopLanScan()
+                }
+            }
+        }
+        monitor.start(queue: queue)
+    }
+    
+    private func checkSecure() {
         StorageService.shared.checkSecure(devices: &connectedDevices)
     }
 }
@@ -142,6 +168,7 @@ extension ScannerViewModel: LanScannerDelegate {
             checkSecure()
             isLanScanning = false
             isNavigatingToResults = true
+            scanProgress = 0
         case .cancelled:
             break
         }
@@ -149,6 +176,7 @@ extension ScannerViewModel: LanScannerDelegate {
 
     func lanScanDidFailedToScan() {
         showAlert = true
+        stopLanScan()
     }
     
     func lanScanDidUpdateProgress(_ progress: Float, overall: Int) {
@@ -167,10 +195,8 @@ extension ScannerViewModel: CBCentralManagerDelegate {
                 performBluetoothScan()
             }
         default:
-            if isBluetoothScanning {
-                showAlert = true
-                centralManager?.stopScan()
-            }
+            showAlert = true
+            stopBluetoothScan()
         }
     }
     

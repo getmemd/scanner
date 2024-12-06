@@ -15,28 +15,19 @@ struct HistoryListView: View {
     
     var body: some View {
         NavigationStack(path: $path) {
-            List {
-                ForEach(viewModel.groupedDevices.keys.sorted(), id: \.self) { dateKey in
-                    Section(header: Text(dateKey)) {
-                        ForEach(viewModel.groupedDevices[dateKey] ?? []) { device in
-                            Button {
-                                path = [device]
-                            } label: {
-                                HistoryDeviceView(device: device)
-                                    .padding(4)
-                            }
-                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                                Button(role: .destructive) {
-                                    viewModel.deleteItem(device: device)
-                                } label: {
-                                    Image(.trashBinSquare)
-                                }
-                                .tint(.gray0)
-                            }
+            ScrollView {
+                VStack(alignment: .leading) {
+                    ForEach(viewModel.groupedDevices.keys.sorted(), id: \.self) { dateKey in
+                        Text(dateKey)
+                        VStack(spacing: 8) {
+                            deviceSection(dateKey: dateKey, isSecure: false)
+                            deviceSection(dateKey: dateKey, isSecure: true)
                         }
                     }
                 }
+                .padding(.horizontal, 32)
             }
+            .background(Color.forth.ignoresSafeArea())
             .refreshable {
                 viewModel.loadHistory()
             }
@@ -55,9 +46,31 @@ struct HistoryListView: View {
             }
         }
     }
-}
-
-#Preview {
-    HistoryListView()
-        .environmentObject(HistoryViewModel())
+    
+    @ViewBuilder
+    private func deviceSection(dateKey: String, isSecure: Bool) -> some View {
+        VStack {
+            ForEach(viewModel.groupedDevices[dateKey]?.filter({ $0.isSecure == isSecure }) ?? []) { device in
+                VStack {
+                    Button {
+                        path = [device]
+                    } label: {
+                        SwipeableRow {
+                            HistoryDeviceView(device: device)
+                        } onDelete: {
+                            viewModel.deleteItem(device: device)
+                        }
+                    }
+                    Divider()
+                        .background(.third)
+                        .padding(.horizontal)
+                }
+            }
+        }
+        .background(.gray0)
+        .overlay {
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(isSecure ? .success : .error, lineWidth: 1)
+        }
+    }
 }

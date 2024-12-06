@@ -132,15 +132,15 @@ struct ResultView: View {
 #Preview {
     ResultView()
         .environmentObject(DeviceManager(devices: [
-//            .init(id: UUID(), name: nil, rssi: 10),
-//            .init(id: UUID(), name: nil, rssi: 10),
-//            .init(id: UUID(), name: nil, rssi: 10),
-//            .init(id: UUID(), name: nil, rssi: 10),
-//            .init(id: UUID(), name: nil, rssi: 10),
-//            .init(id: UUID(), name: nil, rssi: 10),
-//            .init(id: UUID(), name: nil, rssi: 10),
-//            .init(id: UUID(), name: nil, rssi: 10),
-//            .init(id: UUID(), name: nil, rssi: 10),
-//            .init(id: UUID(), name: "Some device", rssi: 100)
+            .init(id: UUID(), name: nil, rssi: 10),
+            .init(id: UUID(), name: nil, rssi: 10),
+            .init(id: UUID(), name: nil, rssi: 10),
+            .init(id: UUID(), name: nil, rssi: 10),
+            .init(id: UUID(), name: nil, rssi: 10),
+            .init(id: UUID(), name: nil, rssi: 10),
+            .init(id: UUID(), name: nil, rssi: 10),
+            .init(id: UUID(), name: nil, rssi: 10),
+            .init(id: UUID(), name: nil, rssi: 10),
+            .init(id: UUID(), name: "Some device", rssi: 100)
         ]))
 }

@@ -27,6 +27,7 @@ struct HistoryDeviceView: View {
             Image(.arrowRight)
                 .foregroundStyle(.gray80)
         }
+        .padding()
     }
 }
 
