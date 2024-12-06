@@ -8,7 +8,6 @@
 import SwiftUI
 import RevenueCat
 import AppsFlyerLib
-import AppTrackingTransparency
 
 @main
 struct ScannerApp: App {
@@ -45,30 +44,14 @@ struct ScannerApp: App {
                 }
             }
             .environmentObject(iapViewModel)
+            .onChange(of: iapViewModel.subscriptionEndDate) { newValue in
+                if newValue > Date.now.timeIntervalSinceReferenceDate {
+                    showPaywall = false
+                }
+            }
             .onAppear {
                 if !iapViewModel.isSubscribed && hasSeenOnboarding {
                     showPaywall = true
-                }
-                Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { timer in
-                    Task {
-                        let result = await ATTrackingManager.requestTrackingAuthorization()
-                        switch result {
-                        case .notDetermined:
-                            break
-                        case .restricted, .denied, .authorized:
-                            timer.invalidate()
-                        @unknown default:
-                            break
-                        }
-                    }
-                }
-            }
-            .task {
-                let center = UNUserNotificationCenter.current()
-                do {
-                    try await center.requestAuthorization(options: [.alert, .sound, .badge])
-                } catch {
-                    print(error.localizedDescription)
                 }
             }
         }

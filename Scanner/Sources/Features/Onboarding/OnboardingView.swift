@@ -6,8 +6,11 @@
 //
 
 import SwiftUI
+import AppTrackingTransparency
 
 struct OnboardingView: View {
+    @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding: Bool = false
+    @EnvironmentObject var iapViewModel: IAPViewModel
     @Environment(\.requestReview) var requestReview
     @State private var showPaywall = false
     @State private var currentPage = 0
@@ -53,11 +56,42 @@ struct OnboardingView: View {
                     }
                 }
                 .tag(index)
+                .gesture(DragGesture())
             }
             PaywallView(viewState: .constant(.info), showPaywall: $showPaywall)
                 .tag(pages.count)
+                .gesture(DragGesture())
         }
         .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
+        .onChange(of: iapViewModel.subscriptionEndDate) { newValue in
+            if newValue > Date.now.timeIntervalSinceReferenceDate {
+                showPaywall = false
+                hasSeenOnboarding = true
+            }
+        }
+        .onAppear {
+            Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { timer in
+                Task {
+                    let result = await ATTrackingManager.requestTrackingAuthorization()
+                    switch result {
+                    case .notDetermined:
+                        break
+                    case .restricted, .denied, .authorized:
+                        timer.invalidate()
+                    @unknown default:
+                        break
+                    }
+                }
+            }
+        }
+        .task {
+            let center = UNUserNotificationCenter.current()
+            do {
+                try await center.requestAuthorization(options: [.alert, .sound, .badge])
+            } catch {
+                print(error.localizedDescription)
+            }
+        }
     }
 }
 

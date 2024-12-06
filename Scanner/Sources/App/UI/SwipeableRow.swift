@@ -43,18 +43,47 @@ struct SwipeableRow<Content: View>: View {
     
     private var dragGesture: some Gesture {
         DragGesture()
-            .updating($translation) { value, state, _ in
-                if value.translation.width < 0 {
-                    state = value.translation.width
+            .onChanged { gesture in
+                if offset == 0 && gesture.translation.width > 0 {
+                    return
                 }
-            }
-            .onEnded { value in
-                withAnimation {
-                    if value.translation.width < -100 {
-                        offset = -100
-                    } else {
-                        offset = 0
+                if gesture.translation.width < -50 {
+                    return
+                }
+                if offset == -50 && gesture.translation.width < 0 {
+                    return
+                }
+                if offset >= -50 {
+                    if gesture.translation.width > 50 {
+                        self.offset = .zero
+                        return
                     }
+                    if offset != 0 && gesture.translation.width > 0 {
+                        self.offset = -50 + gesture.translation.width
+                        return
+                    }
+                }
+                self.offset = gesture.translation.width
+            }
+            .onEnded { gesture in
+                withAnimation {
+                    if self.offset < -30 {
+                        self.offset = -50
+                        return
+                    }
+                    if self.offset < -50 {
+                        self.offset = -50
+                        return
+                    }
+                    if gesture.translation.width > 30 {
+                        self.offset = .zero
+                        return
+                    }
+                    if gesture.translation.width < 30 {
+                        self.offset = -50
+                        return
+                    }
+                    self.offset = .zero
                 }
             }
     }
